@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A Inteligência Artificial ao Serviço do Treinador — André Rocha · 13.º Congresso de Treinadores de Portugal</title>
+
+<!-- Carlito (clone métrico do Calibri usado no template do congresso) — embebida localmente, sem CDN -->
+<style>
+@font-face {
+    font-family: "Carlito";
+    src: url("assets/fonts/Carlito-Regular.ttf") format("truetype");
+    font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: "Carlito";
+    src: url("assets/fonts/Carlito-Bold.ttf") format("truetype");
+    font-weight: 700; font-style: normal; font-display: swap;
+}
+</style>
+
+<style>
+/* ===========================================================
+   ARQUITETURA 16:9 — palco fixo 1280×720 escalado (letterbox).
+   Cada slide é um quadro 16:9 que escala uniformemente para
+   caber em qualquer ecrã → sempre 16:9, responsivo, sem overflow.
+   =========================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow-x: hidden; background: #000; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+:root {
+    /* Tokens em px, desenhados para o palco 1280×720 */
+    --hero-size: 90px;
+    --title-size: 62px;
+    --h2-size: 40px;
+    --h3-size: 26px;
+    --body-size: 21px;
+    --small-size: 14px;
+    --kicker-size: 14px;
+    --pad: 92px;
+
+    /* Paleta do arco-íris do congresso (amostrada do template) */
+    --red:#E0241C; --orange:#EC7A31; --yellow:#FCCE32; --green:#7FBE6B;
+    --teal:#4EB695; --cyan:#36BBDC; --blue:#0E74B6;
+
+    --ink:#0B0B0B; --muted:#5A5A5A; --paper:#FFFFFF;
+    --navy:#0A1A2C; --navy-2:#0E243B;
+
+    --rainbow: linear-gradient(90deg,
+        var(--red) 0%, var(--orange) 18%, var(--yellow) 36%,
+        var(--green) 54%, var(--teal) 68%, var(--cyan) 82%, var(--blue) 100%);
+
+    --font: "Carlito", "Calibri", system-ui, sans-serif;
+}
+
+body { font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+/* Letterbox: o slide preenche o ecrã a preto e centra o palco escalado */
+.slide {
+    width: 100vw; height: 100vh; height: 100dvh;
+    scroll-snap-align: start;
+    display: flex; align-items: center; justify-content: center;
+    background: #000; overflow: hidden; position: relative;
+}
+
+/* Palco fixo 16:9 — toda a maquetação acontece aqui dentro */
+.stage {
+    position: relative;
+    width: 1280px; height: 720px;
+    flex: 0 0 auto;
+    transform: scale(var(--scale, 1));
+    transform-origin: center center;
+    overflow: hidden;
+    background-color: var(--paper);
+}
+.stage.dark { background: radial-gradient(120% 120% at 80% 0%, var(--navy-2) 0%, var(--navy) 60%); color: #EAF1F7; }
+.stage.brand { background-size: cover; background-position: center; background-repeat: no-repeat; }
+.stage.brand-title   { background-image: url("assets/brand-title-bg.jpg"); }
+.stage.brand-content { background-image: url("assets/brand-content-bg.jpg"); }
+
+/* Conteúdo */
+.content {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: var(--pad);
+    z-index: 2;
+}
+.with-footer .content { padding-bottom: 250px; }
+
+/* ============================ Componentes ============================ */
+.kicker {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-size: var(--kicker-size); font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.22em; color: var(--muted);
+}
+.kicker::before { content: ""; width: 48px; height: 6px; border-radius: 6px; background: var(--rainbow); }
+.dark .kicker { color: #9FB6CC; }
+
+h1.hero { font-size: var(--hero-size); font-weight: 700; line-height: 0.98; letter-spacing: -0.025em; }
+h2.title { font-size: var(--title-size); font-weight: 700; line-height: 1.0; letter-spacing: -0.02em; }
+h3.sub { font-size: var(--h2-size); font-weight: 700; line-height: 1.12; letter-spacing: -0.01em; }
+p.lead { font-size: var(--h3-size); font-weight: 400; line-height: 1.4; color: #1c1c1c; }
+.dark p.lead { color: #C9D6E2; }
+p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
+.dark p.body { color: #B9C7D4; }
+
+.rainbow-text { background: var(--rainbow); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.rainbow-underline {
+    background-image: var(--rainbow); background-repeat: no-repeat;
+    background-position: 0 92%; background-size: 100% 0.16em; padding-bottom: 0.04em;
+}
+
+.ghost-num {
+    position: absolute; right: 64px; bottom: 150px;
+    font-size: 300px; font-weight: 700; line-height: 0.7;
+    color: rgba(11,11,11,0.045); letter-spacing: -0.04em; pointer-events: none; z-index: 0;
+}
+.dark .ghost-num { color: rgba(255,255,255,0.05); }
+
+.footer-band { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; z-index: 1; pointer-events: none; user-select: none; }
+/* Marca de água do congresso — canto inferior direito, apenas nos slides claros de conteúdo (exclui os de marca 1/último e os de fundo escuro) */
+.stage:not(.brand):not(.dark)::after {
+  content: ""; position: absolute; bottom: 24px; right: 38px;
+  width: 56px; height: 64px;
+  background: url("assets/congress-logo.png") no-repeat center / contain;
+  z-index: 3; pointer-events: none; opacity: 0.95;
+}
+.rainbow-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; background: var(--rainbow); z-index: 2; }
+
+/* Cartões / colunas */
+.cols { display: flex; gap: 34px; align-items: stretch; }
+.card {
+    flex: 1 1 0; background: #fff; border: 1.5px solid #ECECEC; border-radius: 18px;
+    padding: 28px; display: flex; flex-direction: column; gap: 9px; position: relative;
+    overflow: hidden; box-shadow: 0 18px 40px -28px rgba(0,0,0,0.35);
+}
+.card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 7px; background: var(--accent, var(--blue)); }
+.card .card-k { font-size: var(--small-size); font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent, var(--blue)); }
+.card .card-h { font-size: var(--h3-size); font-weight: 700; line-height: 1.1; }
+.card .card-b { font-size: var(--body-size); line-height: 1.42; color: #444; }
+.dark .card { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); }
+.dark .card .card-b { color: #B9C7D4; }
+
+/* Média */
+.media {
+    position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 430px;
+    border-radius: 16px; overflow: hidden; border: 2px solid rgba(255,255,255,0.10);
+    background: repeating-linear-gradient(135deg, #11263c 0 22px, #0e2034 22px 44px);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 30px 70px -40px rgba(0,0,0,0.8);
+}
+.media::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: var(--rainbow); z-index: 4; }
+.media video, .media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.media-ph { text-align: center; color: #9FB6CC; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px; }
+.media-ph .play { width: 64px; height: 64px; border-radius: 50%; background: var(--rainbow); display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px -8px rgba(0,0,0,0.5); }
+.media-ph .play svg { width: 26px; height: 26px; fill: #fff; margin-left: 4px; }
+.media-ph .ph-label { font-weight: 700; font-size: var(--body-size); }
+.media-ph .ph-path { font-size: var(--small-size); font-family: ui-monospace, Menlo, monospace; background: rgba(127,127,127,0.18); padding: 4px 12px; border-radius: 999px; }
+.media-tag { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: var(--red); color: #fff; padding: 5px 11px; border-radius: 999px; z-index: 5; }
+.media-caption { position: absolute; left: 0; bottom: 0; width: 100%; padding: 12px 16px; font-size: var(--small-size); font-weight: 700; color: #fff; background: linear-gradient(0deg, rgba(0,0,0,0.74), rgba(0,0,0,0)); z-index: 4; }
+
+/* Clips verticais 9:16 (defesas do Gonçalo) */
+.vclips { display: flex; gap: 16px; align-items: center; justify-content: center; height: 100%; }
+.vclip { flex: 1 1 0; max-width: 248px; aspect-ratio: 9 / 16; max-height: 482px; border-radius: 14px; overflow: hidden; border: 2px solid rgba(0,0,0,0.08); box-shadow: 0 24px 50px -30px rgba(0,0,0,0.55); position: relative; background: #0a1626; }
+.vclip video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vclip::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: var(--rainbow); z-index: 2; }
+
+/* Stat gigante */
+.bigstat { display: flex; align-items: baseline; gap: 8px; line-height: 1; }
+.bigstat .n { font-size: 132px; font-weight: 700; letter-spacing: -0.04em; }
+.bigstat .u { font-size: 40px; font-weight: 700; color: var(--cyan); }
+
+/* Manifesto */
+.steps { display: flex; flex-direction: column; gap: 16px; }
+.step { display: flex; gap: 14px; align-items: flex-start; font-size: var(--body-size); line-height: 1.4; }
+.step .dot { flex: 0 0 auto; width: 11px; height: 11px; margin-top: 9px; border-radius: 50%; background: var(--accent, var(--teal)); }
+
+/* Frase duas cores */
+.two-tone { font-size: var(--title-size); font-weight: 700; line-height: 1.06; letter-spacing: -0.02em; }
+.two-tone .yes { color: var(--green); }
+.two-tone .no { color: var(--red); }
+
+/* Desdobramento do acrónimo G.R.O.C.H.A. */
+.acro { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.acro-line { font-size: 36px; font-weight: 400; line-height: 1.32; color: #E7EFF6; letter-spacing: -0.005em; }
+.acro-line b { font-weight: 700; font-size: 1.06em; }
+
+/* ============================ Navegação ============================ */
+.nav-dots { position: fixed; right: 18px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 11px; z-index: 50; }
+.nav-dots button { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid rgba(160,160,160,0.7); background: transparent; cursor: pointer; padding: 0; transition: transform .25s, background .25s, border-color .25s; }
+.nav-dots button.active { background: var(--blue); border-color: var(--blue); transform: scale(1.35); }
+.nav-dots button:hover { border-color: var(--blue); }
+.progress { position: fixed; top: 0; left: 0; height: 4px; width: 0%; background: var(--rainbow); z-index: 60; transition: width .25s ease; }
+.kbd-hint { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #888; z-index: 50; letter-spacing: 0.06em; display: flex; gap: 0.8em; align-items: center; background: rgba(255,255,255,0.08); backdrop-filter: blur(6px); padding: 5px 14px; border-radius: 999px; }
+.kbd-hint b { font-weight: 700; color: #bbb; }
+
+/* Revelação */
+.reveal > * { opacity: 0; transform: translateY(26px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+.in .reveal > * { opacity: 1; transform: none; }
+.in .reveal > *:nth-child(2) { transition-delay: .08s; }
+.in .reveal > *:nth-child(3) { transition-delay: .16s; }
+.in .reveal > *:nth-child(4) { transition-delay: .24s; }
+.in .reveal > *:nth-child(5) { transition-delay: .32s; }
+.in .reveal > *:nth-child(6) { transition-delay: .40s; }
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal > * { opacity: 1 !important; transform: none !important; transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== SLIDE 1 — ABERTURA (marca) ===== -->
+<section class="slide" data-title="Abertura">
+  <div class="stage brand brand-title">
+    <div class="content" style="align-items: flex-end; text-align: right; padding-right: 84px;">
+      <div class="reveal" style="max-width: 760px; display:flex; flex-direction:column; gap: 16px; align-items: flex-end;">
+        <span class="kicker" style="color:#222;">André Rocha</span>
+        <h1 class="hero" style="color:#0b0b0b; font-size: 56px; line-height: 1.05;">A Inteligência <span class="rainbow-text">Artificial</span> ao Serviço do Treinador</h1>
+        <p class="lead" style="color:#1a1a1a; font-weight:700;">Aplicações Práticas e Ferramentas de Apoio</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 2 — QUEM SOU EU ===== -->
+<section class="slide" data-title="Quem sou eu">
+  <div class="stage">
+    <div class="content">
+      <div class="reveal" style="display:flex; flex-direction:column; gap: 22px;">
+        <span class="kicker">Quem sou eu</span>
+        <h2 class="title">Vivo na <span class="rainbow-underline">interseção</span>.</h2>
+        <div class="cols">
+          <div class="card" style="--accent: var(--blue);">
+            <span class="card-k">Treinador de guarda-redes</span>
+            <span class="card-h">Sub-13 · Futsal</span>
+            <span class="card-b">No pavilhão e na formação, a treinar guarda-redes e a ler o jogo.</span>
+          </div>
+          <div class="card" style="--accent: var(--red);">
+            <span class="card-k">Tecnologia · Hoopers</span>
+            <span class="card-h">SportsTech &amp; IA</span>
+            <span class="card-b">16+ anos a construir software e IA aplicada ao desporto.</span>
+          </div>
+        </div>
+        <p class="body" style="max-width: 920px;"><b>Não sou um programador a falar de desporto. Nem um treinador a falar de computadores.</b> Vivo nos dois mundos ao mesmo tempo.</p>
+      </div>
+    </div>
+    <div class="rainbow-bar"></div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 3 — DEMOCRATIZAÇÃO ===== -->
+<section class="slide" data-title="Democratização">
+  <div class="stage">
+    <span class="ghost-num">03</span>
+    <div class="content">
+      <div class="reveal" style="display:flex; flex-direction:column; gap: 22px; max-width: 820px;">
+        <h2 class="title" style="font-size: 72px;">É para quem <span class="rainbow-text">quer</span>,<br />não é só para quem sabe.</h2>
+      </div>
+    </div>
+    <div class="rainbow-bar"></div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 4 — O GONÇALO (clips verticais 9:16, autoplay/muted/loop) ===== -->
+<section class="slide" data-title="O Gonçalo">
+  <div class="stage">
+    <div class="content">
+      <div class="reveal" style="display:flex; flex-direction:row; align-items:center; gap: 48px; height:100%;">
+        <div style="flex: 0 0 400px; display:flex; flex-direction:column; gap: 18px;">
+          <span class="kicker">O projeto</span>
+          <h2 class="title">Este é o <span class="rainbow-underline">Gonçalo</span>.</h2>
+          <p class="lead">Um projeto DIY — de pai para filho.</p>
+          <p class="body">A minha necessidade real, como pai e treinador: dar-lhe feedback individualizado de alta qualidade. Foi isso que me levou a meter as mãos na massa.</p>
+        </div>
+        <div class="vclips" style="flex: 1 1 0;">
+          <!-- Defesas do Gonçalo · acrescenta mais duplicando um .vclip → assets/goncalo-3.mp4, goncalo-4.mp4 -->
+          <div class="vclip"><video src="assets/goncalo-1.mp4" poster="assets/goncalo-1-poster.jpg" autoplay muted loop playsinline></video></div>
+          <div class="vclip"><video src="assets/goncalo-2.mp4" poster="assets/goncalo-2-poster.jpg" autoplay muted loop playsinline></video></div>
+          <div class="vclip"><video src="assets/goncalo-3.mp4" poster="assets/goncalo-3-poster.jpg" autoplay muted loop playsinline></video></div>
+        </div>
+      </div>
+    </div>
+    <div class="rainbow-bar"></div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 5 — TREINO ↔ JOGO ===== -->
+<section class="slide" data-title="Treino ↔ Jogo">
+  <div class="stage dark">
+    <span class="ghost-num">05</span>
+    <div class="content">
+      <div class="reveal" style="display:flex; flex-direction:column; gap: 22px; max-width: 860px;">
+        <h2 class="title" style="font-size: 72px;">"Pai, para que serve<br />este <span class="rainbow-text">exercício</span>?"</h2>
+      </div>
+    </div>
+    <div class="rainbow-bar"></div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 6 — A DECISÃO / O CONCEITO (+ screenshot Claude Code) ===== -->
+<section class="slide" data-title="A Decisão">
+  <div class="stage dark">
+    <div class="content">
+      <div class="reveal cols" style="align-items:center; gap: 46px;">
+        <div style="flex: 0 0 520px; display:flex; flex-direction:column; gap: 22px;">
+          <span class="kicker">A decisão</span>
+          <h2 class="title" style="font-size: 46px;">Tempo zero.<br />Mas a ideia era <span class="rainbow-text">clara</span>.</h2>
+          <p class="lead" style="font-size: 23px; line-height: 1.42; border-left: 4px solid var(--cyan); padding-left: 20px;">"Identificar o movimento técnico de um treino e procurá-lo de forma automática na minha base de dados de jogos."</p>
+        </div>
+        <div style="flex: 1 1 0;">
+          <div class="media">
+            <img src="assets/claude-code.png" alt="Terminal com o Claude Code a construir o Protocolo G.R.O.C.H.A." />
+            <span class="media-caption">A dar as instruções ao Claude Code para dar vida à ideia</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rainbow-bar"></div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 7 — O NASCIMENTO DO PROTOCOLO (acrónimo) ===== -->
+<section class="slide" data-title="O Protocolo">
+  <div class="stage dark">
+    <span class="ghost-num">07</span>
+    <div class="content">
+      <div class="reveal" style="display:flex; flex-direction:column; gap: 26px; max-width: 920px;">
+        <span class="kicker">A identidade</span>
+        <h2 class="title" style="font-size: 54px;">Nasceu o Protocolo <span class="rainbow-text">G.R.O.C.H.A.</span></h2>
+        <div class="acro">
+          <div class="acro-line"><b style="color:var(--red)">G</b>uarda-<b style="color:var(--orange)">R</b>edes</div>
+          <div class="acro-line"><b style="color:var(--yellow)">O</b>timizado por</div>
+          <div class="acro-line"><b style="color:var(--teal)">C</b>omputação</div>
+          <div class="acro-line"><b style="color:var(--cyan)">H</b>umana e</div>
+          <div class="acro-line"><b style="color:var(--blue)">A</b>rtificial</div>
+        </div>
+      </div>
+    </div>
+    <div class="rainbow-bar"></div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 8 — G.R.O.C.H.A. (vídeo) — WOW ===== -->
+<section class="slide" data-title="G.R.O.C.H.A.">
+  <div class="stage dark">
+    <div class="content" style="justify-content: center; padding: 36px 36px 0;">
+      <div class="reveal" style="display:flex; flex-direction:column; gap: 20px;">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <span class="kicker">O resultado · o momento WOW</span>
+          <h2 class="title" style="font-size: 52px;">Protocolo <span class="rainbow-text">G.R.O.C.H.A.</span></h2>
+        </div>
+        <div class="media" style="aspect-ratio: 1710 / 568; max-height: 520px; width: 100%;">
+          <video src="assets/grocha-h264.mp4" poster="assets/grocha-poster.jpg" muted loop playsinline style="object-fit: contain; background:#06101c;"></video>
+        </div>
+      </div>
+    </div>
+    <div class="rainbow-bar"></div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 9 — BANHO DE REALIDADE ===== -->
+<section class="slide" data-title="Banho de realidade">
+  <div class="stage">
+    <span class="ghost-num">09</span>
+    <div class="content">
+      <div class="reveal" style="display:flex; flex-direction:column; gap: 22px; max-width: 900px;">
+        <span class="kicker">Banho de realidade</span>
+        <p class="two-tone">Se é assim tão fácil? <span class="yes">É.</span></p>
+        <p class="two-tone">Se é a forma arquitetonicamente correta de o fazer? <span class="no">Nem por isso.</span></p>
+      </div>
+    </div>
+    <div class="rainbow-bar"></div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 10 — A ABORDAGEM (diagrama de fluxo) ===== -->
+<section class="slide" data-title="A Abordagem">
+  <div class="stage">
+
+    <!-- Cabeçalho -->
+    <div style="position:absolute; top:40px; left:300px; z-index:3; display:flex; flex-direction:column; gap:3px;">
+      <div style="font-size:30px; font-weight:700; letter-spacing:-0.02em;">A Analogia do <span class="rainbow-text">Treino</span></div>
+      <div style="font-size:18px; color:#555;">Treinar o guarda-redes é <b style="color:#111;">exatamente igual</b> a programar com IA.</div>
+    </div>
+
+    <!-- Conectores (setas) -->
+    <svg viewBox="0 0 1280 720" style="position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none;">
+      <defs>
+        <marker id="ah-grey" markerWidth="13" markerHeight="13" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4 L0,8 Z" fill="#9aa3ad"/></marker>
+        <marker id="ah-red" markerWidth="13" markerHeight="13" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4 L0,8 Z" fill="#E0241C"/></marker>
+        <marker id="ah-green" markerWidth="13" markerHeight="13" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4 L0,8 Z" fill="#3E9E4F"/></marker>
+      </defs>
+      <!-- Treinador → Abordagem -->
+      <path d="M270,372 L336,372" fill="none" stroke="#9aa3ad" stroke-width="3" marker-end="url(#ah-grey)"/>
+      <!-- Abordagem → (cima) Mandar fazer -->
+      <path d="M540,360 L590,360 L590,212 L632,212" fill="none" stroke="#E0241C" stroke-width="3" stroke-linejoin="round" marker-end="url(#ah-red)"/>
+      <!-- Abordagem → (baixo) Orquestrar -->
+      <path d="M540,386 L590,386 L590,520 L632,520" fill="none" stroke="#3E9E4F" stroke-width="3" stroke-linejoin="round" marker-end="url(#ah-green)"/>
+      <!-- Mandar fazer → Frustração -->
+      <path d="M912,212 L944,212" fill="none" stroke="#E0241C" stroke-width="3" marker-end="url(#ah-red)"/>
+      <!-- Orquestrar → Resolução -->
+      <path d="M912,520 L944,520" fill="none" stroke="#3E9E4F" stroke-width="3" marker-end="url(#ah-green)"/>
+    </svg>
+
+    <!-- Caixa: O TREINADOR -->
+    <div style="position:absolute; left:60px; top:317px; width:210px; height:110px; z-index:2; box-sizing:border-box; border-radius:16px; background:#fff; border:2.5px solid var(--blue); box-shadow:0 16px 34px -20px rgba(0,0,0,0.4); padding:16px 18px; display:flex; flex-direction:column; justify-content:center; gap:3px;">
+      <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--blue);">O ponto de partida</span>
+      <span style="font-size:25px; font-weight:700; line-height:1;">O Treinador</span>
+      <span style="font-size:14px; color:#777;">a ideia · o problema</span>
+    </div>
+
+    <!-- Caixa: A ABORDAGEM (decisão) -->
+    <div style="position:absolute; left:345px; top:332px; width:195px; height:80px; z-index:2; box-sizing:border-box; border-radius:16px; background:var(--navy); color:#fff; box-shadow:0 16px 34px -18px rgba(0,0,0,0.5); padding:14px 18px; display:flex; flex-direction:column; justify-content:center; gap:2px; overflow:hidden;">
+      <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:#8FC9E6;">A decisão</span>
+      <span style="font-size:25px; font-weight:700; line-height:1;">A Abordagem</span>
+      <span style="position:absolute; bottom:0; left:0; width:100%; height:5px; background:var(--rainbow);"></span>
+    </div>
+
+    <!-- Caixa: MANDAR FAZER (atalho errado) -->
+    <div style="position:absolute; left:636px; top:150px; width:286px; height:124px; z-index:2; box-sizing:border-box; border-radius:16px; background:#fff; border:2.5px solid var(--orange); box-shadow:0 16px 34px -22px rgba(0,0,0,0.4); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:5px;">
+      <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--orange);">✕ O atalho errado</span>
+      <span style="font-size:21px; font-weight:700; line-height:1;">Mandar fazer</span>
+      <div style="display:flex; flex-direction:column; gap:3px; font-size:13.5px; font-style:italic; color:#666; line-height:1.25;">
+        <span>🏟️ “Vai e defende tudo.”</span>
+        <span>💻 “Faz-me um software.”</span>
+      </div>
+    </div>
+
+    <!-- Caixa: FRUSTRAÇÃO -->
+    <div style="position:absolute; left:948px; top:150px; width:272px; height:124px; z-index:2; box-sizing:border-box; border-radius:16px; background:#FCEBE9; border:2.5px solid var(--red); box-shadow:0 16px 34px -22px rgba(224,36,28,0.35); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:4px;">
+      <span style="font-size:24px; font-weight:700; color:var(--red); line-height:1; display:flex; align-items:center; gap:8px;"><span style="font-size:23px;">🙇</span>Frustração</span>
+      <div style="display:flex; flex-direction:column; gap:3px; font-size:14px; color:#9b3a34; line-height:1.25;">
+        <span>🏟️ O miúdo não evolui.</span>
+        <span>💻 O código alucina.</span>
+      </div>
+    </div>
+
+    <!-- Caixa: ORQUESTRAR / TREINAR (processo) -->
+    <div style="position:absolute; left:636px; top:446px; width:286px; height:148px; z-index:2; box-sizing:border-box; border-radius:16px; background:#fff; border:2.5px solid var(--teal); box-shadow:0 16px 34px -22px rgba(0,0,0,0.4); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:6px;">
+      <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--teal);">✓ O processo certo</span>
+      <span style="font-size:21px; font-weight:700; line-height:1;">Orquestrar / Treinar</span>
+      <div style="display:flex; flex-direction:column; gap:3px; font-size:13.5px; color:#444; line-height:1.25;">
+        <span>🏟️ Postura base → queda lateral</span>
+        <span>💻 Código por etapas e iterativo</span>
+      </div>
+    </div>
+
+    <!-- Caixa: RESOLUÇÃO -->
+    <div style="position:absolute; left:948px; top:458px; width:272px; height:124px; z-index:2; box-sizing:border-box; border-radius:16px; background:#EAF6EC; border:2.5px solid var(--green); box-shadow:0 16px 34px -22px rgba(62,158,79,0.3); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:4px;">
+      <span style="font-size:24px; font-weight:700; color:#2F8C40; line-height:1; display:flex; align-items:center; gap:8px;"><span style="font-size:23px;">🏆</span>Resolução</span>
+      <div style="display:flex; flex-direction:column; gap:3px; font-size:14px; color:#2c6e3a; line-height:1.25;">
+        <span>🏟️ A grande defesa</span>
+        <span>💻 O Protocolo G.R.O.C.H.A.</span>
+      </div>
+    </div>
+
+    <div class="rainbow-bar"></div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 11 — O MANIFESTO ===== -->
+<section class="slide" data-title="O Manifesto">
+  <div class="stage dark">
+    <span class="ghost-num">11</span>
+    <div class="content">
+      <div class="reveal" style="display:flex; flex-direction:column; gap: 34px; max-width: 1010px;">
+        <span class="kicker">O manifesto</span>
+        <!-- O alinhamento -->
+        <div style="display:flex; align-items:center; gap:26px; white-space:nowrap; font-size:48px; font-weight:700; letter-spacing:-0.025em; line-height:1.04;">
+          <span>Treinador &amp; Atletas</span>
+          <span style="width:4px; height:50px; background:var(--rainbow); border-radius:4px; flex:0 0 auto;"></span>
+          <span>IA &amp; Resultados</span>
+        </div>
+        <!-- A tese -->
+        <div style="display:flex; flex-direction:column; gap:14px; max-width:920px;">
+          <p class="lead" style="font-size:27px; line-height:1.4;">O sucesso não se improvisa no momento da defesa — ou do pedido ao <span style="color:#8FA6BC;">"chatgpt"</span>.</p>
+          <p class="lead" style="font-size:27px; line-height:1.4; color:#F3F8FC;">É a <span class="rainbow-text">consistência das bases</span> que crias que dita o resultado.</p>
+        </div>
+      </div>
+    </div>
+    <div class="rainbow-bar"></div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 12 — FECHO (marca) ===== -->
+<section class="slide" data-title="Obrigado">
+  <div class="stage brand brand-content">
+    <div class="content" style="justify-content:flex-start; padding-top: 96px; align-items:center; text-align:center;">
+      <div class="reveal" style="display:flex; flex-direction:column; gap: 16px; align-items:center; width:100%;">
+        <h1 class="hero" style="color:#0b0b0b; font-size:62px; line-height:1.1; max-width:1020px;">Arrisca e entra em campo com m<span class="rainbow-text">AI</span>s um.</h1>
+        <p style="color:#2a2a2a; font-size:36px; font-weight:400; letter-spacing:0.02em; margin-top:4px;">Obrigado.</p>
+        <p class="body" style="color:#444;"><b>André Rocha</b> · Hoopers · 13.º Congresso de Treinadores de Portugal</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<nav class="nav-dots" id="navDots" aria-label="Navegação de slides"></nav>
+<div class="kbd-hint"><b>↑ ↓</b> ou <b>espaço</b> · <b>F</b> ecrã inteiro</div>
+
+<script>
+/* ===== Escala 16:9: ajusta o palco ao ecrã (letterbox) ===== */
+function fitStage() {
+    const s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    document.documentElement.style.setProperty('--scale', s);
+}
+window.addEventListener('resize', fitStage);
+fitStage();
+
+/* ===== Controlador da apresentação ===== */
+class Presentation {
+    constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.current = 0;
+        this.progress = document.getElementById('progress');
+        this.buildDots();
+        this.observe();
+        this.bindKeys();
+        this.updateProgress();
+        this.applyHash();
+        window.addEventListener('hashchange', () => this.applyHash());
+    }
+    stageOf(s) { return s.querySelector('.stage'); }
+    applyHash() {
+        const m = (location.hash || '').match(/\d+/);
+        if (!m) return;
+        const i = Math.max(0, Math.min(this.slides.length - 1, parseInt(m[0], 10) - 1));
+        this.slides[i].scrollIntoView({ behavior: 'auto' });
+        this.stageOf(this.slides[i]).classList.add('in');
+    }
+    buildDots() {
+        const nav = document.getElementById('navDots');
+        this.slides.forEach((s, i) => {
+            const b = document.createElement('button');
+            b.title = s.dataset.title || ('Slide ' + (i + 1));
+            b.setAttribute('aria-label', b.title);
+            b.addEventListener('click', () => this.goTo(i));
+            nav.appendChild(b);
+        });
+        this.dots = Array.from(nav.children);
+    }
+    observe() {
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                const vids = e.target.querySelectorAll('video');
+                if (e.isIntersecting) {
+                    this.stageOf(e.target).classList.add('in');
+                    this.current = this.slides.indexOf(e.target);
+                    this.syncDots(); this.updateProgress();
+                    // arranca os vídeos do início ao entrar no slide
+                    vids.forEach((v) => {
+                        try { v.currentTime = 0; } catch (_) {}
+                        const pr = v.play();
+                        if (pr && pr.catch) pr.catch(() => {});
+                    });
+                } else {
+                    vids.forEach((v) => v.pause());
+                }
+            });
+        }, { threshold: 0.55 });
+        this.slides.forEach((s) => io.observe(s));
+    }
+    syncDots() { this.dots.forEach((d, i) => d.classList.toggle('active', i === this.current)); }
+    updateProgress() {
+        const pct = this.slides.length > 1 ? (this.current / (this.slides.length - 1)) * 100 : 100;
+        this.progress.style.width = pct + '%';
+    }
+    goTo(i) { i = Math.max(0, Math.min(this.slides.length - 1, i)); this.slides[i].scrollIntoView({ behavior: 'smooth' }); }
+    next() { this.goTo(this.current + 1); }
+    prev() { this.goTo(this.current - 1); }
+    bindKeys() {
+        window.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowDown': case 'ArrowRight': case ' ': case 'PageDown': e.preventDefault(); this.next(); break;
+                case 'ArrowUp': case 'ArrowLeft': case 'PageUp': e.preventDefault(); this.prev(); break;
+                case 'Home': e.preventDefault(); this.goTo(0); break;
+                case 'End': e.preventDefault(); this.goTo(this.slides.length - 1); break;
+                case 'f': case 'F':
+                    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+                    else document.exitFullscreen();
+                    break;
+            }
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Modo de captura: ?only=N isola um slide (screenshots fiáveis em headless)
+    const only = new URLSearchParams(location.search).get('only');
+    if (only) {
+        const idx = parseInt(only, 10) - 1;
+        const slides = Array.from(document.querySelectorAll('.slide'));
+        document.documentElement.style.scrollSnapType = 'none';
+        slides.forEach((s, i) => {
+            if (i === idx) s.querySelector('.stage').classList.add('in');
+            else s.style.display = 'none';
+        });
+        fitStage();
+        return;
+    }
+    const p = new Presentation();
+    p.stageOf(p.slides[0]).classList.add('in');
+});
+</script>
+</body>
+</html>

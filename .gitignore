@@ -1,0 +1,11 @@
+# Configuração local do Claude Code / ECC (não faz parte da apresentação)
+.claude/
+
+# Lixo de sistema operativo
+.DS_Store
+Thumbs.db
+*~
+
+# Temporários
+*.tmp
+*.log

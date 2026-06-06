@@ -796,9 +796,9 @@ class Presentation {
         el.innerHTML = el.dataset.fix || el.innerHTML;   // data-fix pode conter <span rainbow-text>
         el.classList.remove('struck'); el.classList.add('replaced');
         if (el.hasAttribute('data-rainbow')) el.classList.add('rainbow-text');
-        if (el.dataset.reveal) {                         // revela um elemento associado (ex.: o acrónimo)
+        if (el.dataset.reveal) {                         // revela DEPOIS da troca/assinatura (nota, acrónimo)
             const t = this.slides[this.current].querySelector(el.dataset.reveal);
-            if (t) t.classList.add('show');
+            if (t) { clearTimeout(this._revealT); this._revealT = setTimeout(() => t.classList.add('show'), 700); }
         }
     }
     finalizeCorrection() {
@@ -858,8 +858,8 @@ class Presentation {
         }
     }
     resetCorrection() {
-        clearTimeout(this._struckT); clearTimeout(this._swapT);
-        this._struckT = this._swapT = null;
+        clearTimeout(this._struckT); clearTimeout(this._swapT); clearTimeout(this._revealT);
+        this._struckT = this._swapT = this._revealT = null;
         this.pendingCorrection = false;
         this.fixEls.forEach((el) => {
             if (el._origHTML != null) el.innerHTML = el._origHTML;

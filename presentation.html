@@ -294,8 +294,8 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
 /* Correção em tempo real no Slide 2 — substituição da palavra no próprio título */
 .role-treinador { transition: color .3s ease; }
 .role-treinador.struck { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 5px; color: #9aa3ad; }
-.role-treinador.replaced { animation: swapWord .5s cubic-bezier(.16,1,.3,1); }
-@keyframes swapWord { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: none; } }
+.role-treinador.replaced { animation: swapWord .7s cubic-bezier(.16,1,.3,1); }
+@keyframes swapWord { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
   .mairisa-orb, .mairisa-text.typing::after { animation: none; }
@@ -675,7 +675,8 @@ class Presentation {
         this.panel = document.getElementById('mairisa-panel');
         this.mairisaTextEl = document.getElementById('mairisaText');
         this.roleTreinador = document.querySelector('.role-treinador');
-        this._swapT = null;
+        this._swapT = null; this._struckT = null;
+        this.pendingCorrection = false;
         this.mairisaState = 'closed';   // closed | typing | shown
         this.typeTimer = null;
         this.fullText = '';
@@ -749,11 +750,18 @@ class Presentation {
         if (!dlg) { this.next(); return; }                 // slide sem diálogo → avança
         if (this.mairisaState === 'shown') { this.next(); return; }   // 2.º Enter → fecha (goTo) + avança
         if (this.mairisaState === 'typing') { this.finishTyping(); return; } // Enter a meio → completa já
-        // 1.º Enter → abre + escreve
+        // 1.º Enter → abre + escreve (a correção só acontece DEPOIS do texto completo)
         this.openPanel();
-        if (this.current === 1) this.applyCorrection();    // slide 2: correção "Treinador"
-        if (this.reducedMotion) { this.mairisaTextEl.textContent = dlg; this.fullText = dlg; this.mairisaState = 'shown'; }
-        else this.typeText(dlg);
+        this.pendingCorrection = (this.current === 1);
+        if (this.reducedMotion) {
+            this.mairisaTextEl.textContent = dlg; this.fullText = dlg; this.mairisaState = 'shown';
+            this.maybeCorrect();
+        } else {
+            this.typeText(dlg);
+        }
+    }
+    maybeCorrect() {
+        if (this.pendingCorrection) { this.pendingCorrection = false; this.applyCorrection(); }
     }
     openPanel() { this.panel.classList.add('open'); document.body.classList.add('panel-open'); fitStage(); }
     closeMairisa() {
@@ -778,6 +786,7 @@ class Presentation {
                 clearInterval(this.typeTimer); this.typeTimer = null;
                 el.classList.remove('typing');
                 this.mairisaState = 'shown';
+                this.maybeCorrect();              // só corrige depois do texto completo
             }
         }, 20);
     }
@@ -786,6 +795,7 @@ class Presentation {
         this.mairisaTextEl.textContent = this.fullText;
         this.mairisaTextEl.classList.remove('typing');
         this.mairisaState = 'shown';
+        this.maybeCorrect();
     }
     applyCorrection() {
         const el = this.roleTreinador;
@@ -795,16 +805,17 @@ class Presentation {
             el.classList.remove('struck'); el.classList.add('replaced');
             return;
         }
-        el.classList.add('struck');                 // 1) risca "Treinador"
-        clearTimeout(this._swapT);
-        this._swapT = setTimeout(() => {            // 2) apaga e escreve no mesmo sítio, mesma fonte
+        clearTimeout(this._struckT); clearTimeout(this._swapT);
+        this._struckT = setTimeout(() => { el.classList.add('struck'); }, 650);   // 1) risca "Treinador" (após o texto)
+        this._swapT  = setTimeout(() => {                                         // 2) apaga e escreve no mesmo sítio
             el.textContent = 'Apoio à Equipa Técnica';
-            el.classList.remove('struck');
-            el.classList.add('replaced');
-        }, 1100);
+            el.classList.remove('struck'); el.classList.add('replaced');
+        }, 2200);                                                                 // bem mais lento e deliberado
     }
     resetCorrection() {
-        if (this._swapT) { clearTimeout(this._swapT); this._swapT = null; }
+        clearTimeout(this._struckT); clearTimeout(this._swapT);
+        this._struckT = this._swapT = null;
+        this.pendingCorrection = false;
         const el = this.roleTreinador;
         if (el) { el.textContent = 'Treinador'; el.classList.remove('struck', 'replaced'); }
     }

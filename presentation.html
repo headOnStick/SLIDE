@@ -675,7 +675,7 @@ class Presentation {
         this.panel = document.getElementById('mairisa-panel');
         this.mairisaTextEl = document.getElementById('mairisaText');
         this.roleTreinador = document.querySelector('.role-treinador');
-        this._swapT = null; this._struckT = null;
+        this._swapT = null; this._struckT = null; this._closeT = null;
         this.pendingCorrection = false;
         this.mairisaState = 'closed';   // closed | typing | shown
         this.typeTimer = null;
@@ -764,6 +764,7 @@ class Presentation {
         if (this.pendingCorrection) { this.pendingCorrection = false; this.applyCorrection(); }
     }
     openPanel() { this.panel.classList.add('open'); document.body.classList.add('panel-open'); fitStage(); }
+    softClosePanel() { this.panel.classList.remove('open'); document.body.classList.remove('panel-open'); fitStage(); } // fecha sem desfazer a correção
     closeMairisa() {
         if (this.typeTimer) { clearInterval(this.typeTimer); this.typeTimer = null; }
         this.panel.classList.remove('open');
@@ -810,11 +811,12 @@ class Presentation {
         this._swapT  = setTimeout(() => {                                         // 2) apaga e escreve no mesmo sítio
             el.textContent = 'Apoio à Equipa Técnica';
             el.classList.remove('struck'); el.classList.add('replaced');
+            this._closeT = setTimeout(() => this.softClosePanel(), 950);          // 3) fecha a mAIrisa mas fica no slide
         }, 2200);                                                                 // bem mais lento e deliberado
     }
     resetCorrection() {
-        clearTimeout(this._struckT); clearTimeout(this._swapT);
-        this._struckT = this._swapT = null;
+        clearTimeout(this._struckT); clearTimeout(this._swapT); clearTimeout(this._closeT);
+        this._struckT = this._swapT = this._closeT = null;
         this.pendingCorrection = false;
         const el = this.roleTreinador;
         if (el) { el.textContent = 'Treinador'; el.classList.remove('struck', 'replaced'); }

@@ -196,6 +196,8 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
 /* Desdobramento do acrónimo G.R.O.C.H.A. */
 .acro { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; opacity: 0; transition: opacity .4s ease; }
 .acro.show { opacity: 1; }
+.final-note { opacity: 0; transition: opacity .5s ease; font-size: 18px; font-style: italic; color: #6a6f78; margin-top: 14px; }
+.final-note.show { opacity: 1; }
 .acro-line { font-size: 36px; font-weight: 400; line-height: 1.32; color: #E7EFF6; letter-spacing: -0.005em; }
 .acro-line b { font-weight: 700; font-size: 1.06em; }
 
@@ -619,7 +621,8 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
       <div class="reveal" style="display:flex; flex-direction:column; gap: 16px; align-items:center; width:100%;">
         <h1 class="hero" style="color:#0b0b0b; font-size:64px; line-height:1.08; max-width:1020px;">Arrisca e entra em campo com m<span class="rainbow-text">AI</span>s um.</h1>
         <p style="color:#2a2a2a; font-size:36px; font-weight:400; letter-spacing:0.02em; margin-top:4px;">Obrigado.</p>
-        <p style="color:#1a1a1a; font-size:32px; font-weight:700; letter-spacing:-0.01em; margin-top:10px;"><span class="mai-fix" data-crossfade="1" data-fix="André Rocha e m<span class='rainbow-text'>A</span>r<span class='rainbow-text'>I</span>sa">André Rocha</span></p>
+        <p style="color:#1a1a1a; font-size:32px; font-weight:700; letter-spacing:-0.01em; margin-top:10px;"><span class="mai-fix" data-crossfade="1" data-reveal=".final-note" data-fix="André Rocha e m<span class='rainbow-text'>A</span>r<span class='rainbow-text'>I</span>sa">André Rocha</span></p>
+        <p class="final-note">Agora que já tens mais tempo… podes ir tirar o curso de Treinador.</p>
       </div>
     </div>
   </div>
@@ -863,7 +866,7 @@ class Presentation {
             el.classList.remove('struck', 'replaced', 'rainbow-text');
             el.style.opacity = ''; el.style.transition = '';
         });
-        document.querySelectorAll('.acro.show').forEach((a) => a.classList.remove('show')); // re-esconde o acrónimo
+        document.querySelectorAll('.acro.show, .final-note.show').forEach((a) => a.classList.remove('show')); // re-esconde elementos revelados
     }
 
     bindKeys() {

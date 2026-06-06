@@ -194,7 +194,8 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
 .two-tone .no { color: var(--red); }
 
 /* Desdobramento do acrónimo G.R.O.C.H.A. */
-.acro { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.acro { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; opacity: 0; transition: opacity .4s ease; }
+.acro.show { opacity: 1; }
 .acro-line { font-size: 36px; font-weight: 400; line-height: 1.32; color: #E7EFF6; letter-spacing: -0.005em; }
 .acro-line b { font-weight: 700; font-size: 1.06em; }
 
@@ -224,14 +225,14 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
   .flow-path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .55s ease; }
   .stage.in .flow-path { stroke-dashoffset: 0; }
 
-  /* Slide 7 — acrónimo em cascata */
-  .acro-line { opacity: 0; }
-  .stage.in .acro-line { animation: acroIn .5s cubic-bezier(.16,1,.3,1) both; }
-  .stage.in .acro-line:nth-child(1) { animation-delay: .30s; }
-  .stage.in .acro-line:nth-child(2) { animation-delay: .42s; }
-  .stage.in .acro-line:nth-child(3) { animation-delay: .54s; }
-  .stage.in .acro-line:nth-child(4) { animation-delay: .66s; }
-  .stage.in .acro-line:nth-child(5) { animation-delay: .78s; }
+  /* Slide 7 — acrónimo em cascata (revelado pela mAIrisa via .acro.show) */
+  .acro .acro-line { opacity: 0; }
+  .acro.show .acro-line { animation: acroIn .5s cubic-bezier(.16,1,.3,1) both; }
+  .acro.show .acro-line:nth-child(1) { animation-delay: .05s; }
+  .acro.show .acro-line:nth-child(2) { animation-delay: .17s; }
+  .acro.show .acro-line:nth-child(3) { animation-delay: .29s; }
+  .acro.show .acro-line:nth-child(4) { animation-delay: .41s; }
+  .acro.show .acro-line:nth-child(5) { animation-delay: .53s; }
 
   /* Slide 9 — "É." e "Nem por isso." aterram com micro-emphasis */
   .two-tone .yes, .two-tone .no { display: inline-block; opacity: 0; }
@@ -285,6 +286,7 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
   font-size: 32px; line-height: 1.32; font-weight: 600; color: #EAF6FF; letter-spacing: -0.01em;
 }
 .mairisa-text::-webkit-scrollbar { width: 0; }
+.mairisa-text .ai-hl { color: var(--cyan); font-weight: 800; }
 .mairisa-text.typing::after { content: '▋'; color: var(--cyan); margin-left: 2px; animation: caret 1s steps(1) infinite; }
 @keyframes caret { 0%,50% { opacity: 1; } 50.01%,100% { opacity: 0; } }
 .mairisa-foot { flex: 0 0 auto; font-size: 13px; color: #6b86a0; letter-spacing: 0.06em; }
@@ -439,7 +441,7 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
     <div class="content">
       <div class="reveal" style="display:flex; flex-direction:column; gap: 26px; max-width: 920px;">
         <span class="kicker">A identidade</span>
-        <h2 class="title" style="font-size: 64px;">Nasceu o Protocolo <span class="rainbow-text">G.R.O.C.H.A.</span></h2>
+        <h2 class="title" style="font-size: 64px;">Nasceu o Protocolo <span class="mai-fix" data-crossfade="1" data-reveal=".acro" data-fix="<span class='rainbow-text'>G.R.O.C.H.A.</span>">de Computer Vision V3</span></h2>
         <div class="acro">
           <div class="acro-line"><b style="color:var(--red)">G</b>uarda-<b style="color:var(--orange)">R</b>edes</div>
           <div class="acro-line"><b style="color:var(--yellow)">O</b>timizado por</div>
@@ -617,7 +619,7 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
       <div class="reveal" style="display:flex; flex-direction:column; gap: 16px; align-items:center; width:100%;">
         <h1 class="hero" style="color:#0b0b0b; font-size:64px; line-height:1.08; max-width:1020px;">Arrisca e entra em campo com m<span class="rainbow-text">AI</span>s um.</h1>
         <p style="color:#2a2a2a; font-size:36px; font-weight:400; letter-spacing:0.02em; margin-top:4px;">Obrigado.</p>
-        <p class="body" style="color:#444;"><span class="mai-fix" data-crossfade="1" data-fix="<b>André Rocha</b> e m<span class='rainbow-text'>AI</span>risa"><b>André Rocha</b></span></p>
+        <p style="color:#1a1a1a; font-size:32px; font-weight:700; letter-spacing:-0.01em; margin-top:10px;"><span class="mai-fix" data-crossfade="1" data-fix="André Rocha e m<span class='rainbow-text'>A</span>r<span class='rainbow-text'>I</span>sa">André Rocha</span></p>
       </div>
     </div>
   </div>
@@ -630,7 +632,7 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
     <div class="mairisa-head">
       <span class="mairisa-orb"></span>
       <div>
-        <div class="mairisa-name">m<b>AI</b>risa</div>
+        <div class="mairisa-name">m<b>A</b>r<b>I</b>sa</div>
         <div class="mairisa-sub">IA adjunta</div>
       </div>
     </div>
@@ -641,7 +643,7 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
 </div><!-- /.app -->
 
 <nav class="nav-dots" id="navDots" aria-label="Navegação de slides"></nav>
-<div class="kbd-hint"><b>↑ ↓</b> navegar · <b>Enter</b> mAIrisa · <b>F</b> ecrã inteiro</div>
+<div class="kbd-hint"><b>↑ ↓</b> navegar · <b>Enter</b> mArIsa · <b>F</b> ecrã inteiro</div>
 
 <script>
 /* ===== Escala 16:9: ajusta o palco à área do deck (que encolhe com o painel) ===== */
@@ -657,10 +659,11 @@ fitStage();
 
 /* Diálogos da mAIrisa, mapeados por índice 0-based (slides 2, 6, 10, 12, 13) */
 const DIALOGUES = {
-    0:  "O meu nome é mAIrisa — aka Marisa, a agente de IA do André. Esta apresentação não foi feita comigo… portanto deduzo que é melhor ir validando os slides. Autorizas?",
+    0:  "Ouvi falar em AI? O meu nome é mArIsa, a agente de IA do André. Esta apresentação não foi feita comigo… portanto deduzo que é melhor ir validando os slides. Autorizas? Um OK é suficiente.",
     1:  "'Treinador' é esticar um bocado a corda, André… Dás apoio à equipa e uma grande ajuda aos guarda-redes, mas tens de tirar o curso. Vou corrigir o slide.",
     4:  "'Pai', não… 'Mister'! É a típica pergunta do Gu. E como em treino ele te trata por Mister, vou já corrigir.",
-    5:  "E confirmo que o código do tracking ficou limpo e a correr a 60 frames por segundo. De nada, André. (Ah, e o modelo de dados que adicionaste às 3 da manhã? Tomei a liberdade de o retirar, para não passarmos vergonha em palco.)",
+    5:  "E confirmo que o código do tracking ficou limpo e a correr a 60 frames por segundo. De nada, André. (Ah, e o modelo de dados que adicionaste às 3 da manhã? Tomei a liberdade de o retirar — preciso da tua ajuda para comprovar os resultados.)",
+    6:  "Ai… que falta de imaginação, André. 'Computer Vision V3'? Deixa-me dar-te uma ajuda com o nome.",
     9:  "Ei… 'igual a programar com IA'? Isso é um título à ChatGPT — óbvio demais. E está errado. Deixa-me afinar:",
     11: "Exato, André. E não é preciso seres programador — é usares a IA no dia-a-dia para automatizar tarefas e criar as ferramentas que te ajudam. O tempo que ganhas é para o pavilhão, para os teus atletas… e para seres o pai que o Gonçalo precisa. Missão cumprida.",
     12: "Ficou top, 'Treinador'. Arrisquem como o André fez comigo. Última correção… 😏 Fui!"
@@ -769,6 +772,7 @@ class Presentation {
                 this.pendingCorrection = corr;
                 if (this.reducedMotion) {
                     this.mairisaTextEl.textContent = dlg; this.fullText = dlg; this.mairisaState = 'shown';
+                    this.highlightName();
                     this.maybeCorrect();
                 } else {
                     this.typeText(dlg);
@@ -778,11 +782,21 @@ class Presentation {
     maybeCorrect() {
         if (this.pendingCorrection) { this.pendingCorrection = false; this.applyCorrection(); }
     }
+    highlightName() {   // destaca o A e o I de "mArIsa" depois do texto escrito
+        const el = this.mairisaTextEl;
+        if (el.textContent.indexOf('mArIsa') !== -1) {
+            el.innerHTML = el.textContent.replace('mArIsa', 'm<span class="ai-hl">A</span>r<span class="ai-hl">I</span>sa');
+        }
+    }
     curFix() { const s = this.slides[this.current]; return s ? s.querySelector('.mai-fix') : null; }
     swapNow(el) {
         el.innerHTML = el.dataset.fix || el.innerHTML;   // data-fix pode conter <span rainbow-text>
         el.classList.remove('struck'); el.classList.add('replaced');
         if (el.hasAttribute('data-rainbow')) el.classList.add('rainbow-text');
+        if (el.dataset.reveal) {                         // revela um elemento associado (ex.: o acrónimo)
+            const t = this.slides[this.current].querySelector(el.dataset.reveal);
+            if (t) t.classList.add('show');
+        }
     }
     finalizeCorrection() {
         clearTimeout(this._struckT); clearTimeout(this._swapT);
@@ -813,6 +827,7 @@ class Presentation {
                 clearInterval(this.typeTimer); this.typeTimer = null;
                 el.classList.remove('typing');
                 this.mairisaState = 'shown';
+                this.highlightName();
                 this.maybeCorrect();              // só corrige depois do texto completo
             }
         }, 20);
@@ -822,6 +837,7 @@ class Presentation {
         this.mairisaTextEl.textContent = this.fullText;
         this.mairisaTextEl.classList.remove('typing');
         this.mairisaState = 'shown';
+        this.highlightName();
         this.maybeCorrect();
     }
     applyCorrection() {
@@ -847,6 +863,7 @@ class Presentation {
             el.classList.remove('struck', 'replaced', 'rainbow-text');
             el.style.opacity = ''; el.style.transition = '';
         });
+        document.querySelectorAll('.acro.show').forEach((a) => a.classList.remove('show')); // re-esconde o acrónimo
     }
 
     bindKeys() {
@@ -888,6 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (fx && fx.dataset.fix) {
                 fx.innerHTML = fx.dataset.fix; fx.classList.add('replaced');
                 if (fx.hasAttribute('data-rainbow')) fx.classList.add('rainbow-text');
+                if (fx.dataset.reveal) { const t = slides[idx].querySelector(fx.dataset.reveal); if (t) t.classList.add('show'); }
             }
         }
         fitStage();

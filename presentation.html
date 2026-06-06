@@ -621,7 +621,7 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
       <div class="reveal" style="display:flex; flex-direction:column; gap: 16px; align-items:center; width:100%;">
         <h1 class="hero" style="color:#0b0b0b; font-size:64px; line-height:1.08; max-width:1020px;">Arrisca e entra em campo com m<span class="rainbow-text">AI</span>s um.</h1>
         <p style="color:#2a2a2a; font-size:36px; font-weight:400; letter-spacing:0.02em; margin-top:4px;">Obrigado.</p>
-        <p style="color:#1a1a1a; font-size:32px; font-weight:700; letter-spacing:-0.01em; margin-top:10px;"><span class="mai-fix" data-crossfade="1" data-reveal=".final-note" data-fix="André Rocha e m<span class='rainbow-text'>A</span>r<span class='rainbow-text'>I</span>sa">André Rocha</span></p>
+        <p style="color:#1a1a1a; font-size:32px; font-weight:700; letter-spacing:-0.01em; margin-top:10px;"><span class="mai-fix" data-crossfade="1" data-fix="André Rocha e m<span class='rainbow-text'>A</span>r<span class='rainbow-text'>I</span>sa">André Rocha</span></p>
         <p class="final-note">Agora que já tens mais tempo… podes ir tirar o curso de Treinador.</p>
       </div>
     </div>
@@ -762,11 +762,14 @@ class Presentation {
             case 'typing':
                 this.finishTyping();                        // Enter a meio → completa o texto já
                 break;
-            case 'shown':                                   // 2.º Enter: mAIrisa sai e FICA no slide (vês tudo)
+            case 'shown': {                                 // 2.º Enter: mAIrisa sai e FICA no slide (vês tudo)
                 this.finalizeCorrection();                  // garante a troca, se este slide tiver
+                const note = this.slides[this.current].querySelector('.final-note');
+                if (note) note.classList.add('show');       // revela a nota a seguir à assinatura
                 this.softClosePanel();
                 this.mairisaState = 'sealed';
                 break;
+            }
             case 'sealed':                                  // 3.º Enter: avança (último slide fica, mantém assinatura)
                 if (this.current < this.slides.length - 1) this.next();
                 break;
@@ -910,6 +913,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (fx.hasAttribute('data-rainbow')) fx.classList.add('rainbow-text');
                 if (fx.dataset.reveal) { const t = slides[idx].querySelector(fx.dataset.reveal); if (t) t.classList.add('show'); }
             }
+            const note = slides[idx] && slides[idx].querySelector('.final-note');
+            if (note) note.classList.add('show');
         }
         fitStage();
         return;

@@ -291,10 +291,10 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
 .mairisa-foot b { color: var(--cyan); }
 body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacity .3s; }
 
-/* Correção em tempo real no Slide 2 — substituição da palavra no próprio título */
-.role-treinador { transition: color .3s ease; }
-.role-treinador.struck { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 5px; color: #9aa3ad; }
-.role-treinador.replaced { animation: swapWord .7s cubic-bezier(.16,1,.3,1); }
+/* mAIrisa — substituição de palavra no próprio título (slides 2 e 5) */
+.mai-fix { transition: color .3s ease; }
+.mai-fix.struck { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 5px; color: #9aa3ad; }
+.mai-fix.replaced { animation: swapWord .7s cubic-bezier(.16,1,.3,1); }
 @keyframes swapWord { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
@@ -341,7 +341,7 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
     <div class="content">
       <div class="reveal" style="display:flex; flex-direction:column; gap: 22px;">
         <span class="kicker">Quem sou eu</span>
-        <h2 class="title">Autodidata <span style="color:var(--orange)">•</span> Empresário<br />Pai <span style="color:var(--teal)">•</span> <span class="role-treinador">Treinador</span></h2>
+        <h2 class="title">Autodidata <span style="color:var(--orange)">•</span> Empresário<br />Pai <span style="color:var(--teal)">•</span> <span class="mai-fix" data-fix="Apoio à Equipa Técnica">Treinador</span></h2>
         <div class="cols">
           <div class="card" style="--accent: var(--blue);">
             <span class="card-k">Treinador de guarda-redes</span>
@@ -403,7 +403,7 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
     <span class="ghost-num">05</span>
     <div class="content">
       <div class="reveal" style="display:flex; flex-direction:column; gap: 22px; max-width: 860px;">
-        <h2 class="title" style="font-size: 64px;">"Pai, para que serve<br />este <span class="rainbow-text">exercício</span>?"</h2>
+        <h2 class="title" style="font-size: 64px;">"<span class="mai-fix" data-fix="Mister" data-rainbow="1">Pai</span>, para que serve<br />este <span class="rainbow-text">exercício</span>?"</h2>
       </div>
     </div>
     <div class="rainbow-bar"></div>
@@ -659,6 +659,7 @@ fitStage();
 const DIALOGUES = {
     0:  "O meu nome é mAIrisa — aka Marisa, a agente de IA do André. Esta apresentação não foi feita comigo… portanto deduzo que é melhor ir validando os slides. Autorizas?",
     1:  "'Treinador' é esticar um bocado a corda, André… Dás apoio à equipa e uma grande ajuda aos guarda-redes, mas tens de tirar o curso. Vou corrigir o slide.",
+    4:  "'Pai', não… 'Mister'! É a típica pergunta do Gu. E como em treino ele te trata por Mister, vou já corrigir.",
     5:  "E confirmo que o código do tracking ficou limpo e a correr a 60 frames por segundo. De nada, André. (Ah, e aquela linha de código que querias inventar às 3 da manhã? Apaguei-a para não passares vergonha em palco.)",
     9:  "Sim ou sopas! Se o prompt for fraco, eu alucino mesmo. Se vocês me derem ordens genéricas, eu devolvo respostas genéricas. Eu preciso de bases, regras e contexto. O cérebro do treinador tem de comandar!",
     11: "Exato, André. Menos tempo perdido no terminal a bater código significa mais tempo para estares no pavilhão com os teus atletas. E mais tempo para seres o pai que o Gonçalo precisa. Missão cumprida.",
@@ -675,8 +676,9 @@ class Presentation {
         /* mAIrisa */
         this.panel = document.getElementById('mairisa-panel');
         this.mairisaTextEl = document.getElementById('mairisaText');
-        this.roleTreinador = document.querySelector('.role-treinador');
-        this._swapT = null; this._struckT = null; this._closeT = null;
+        this.fixEls = Array.from(document.querySelectorAll('.mai-fix'));
+        this.fixEls.forEach((el) => { el.dataset.orig = el.textContent; });
+        this._swapT = null; this._struckT = null;
         this.pendingCorrection = false;
         this.mairisaState = 'closed';   // closed | typing | shown
         this.typeTimer = null;
@@ -749,7 +751,7 @@ class Presentation {
     handleEnter() {
         const dlg = this.dialogues[this.current];
         if (!dlg) { this.next(); return; }                  // slide sem diálogo → avança
-        const corr = (this.current === 1);                  // slide com substituição de palavra
+        const corr = !!this.curFix();                       // slide com substituição de palavra
         switch (this.mairisaState) {
             case 'typing':
                 this.finishTyping();                        // Enter a meio → completa o texto já
@@ -780,10 +782,16 @@ class Presentation {
     maybeCorrect() {
         if (this.pendingCorrection) { this.pendingCorrection = false; this.applyCorrection(); }
     }
+    curFix() { const s = this.slides[this.current]; return s ? s.querySelector('.mai-fix') : null; }
+    swapNow(el) {
+        el.textContent = el.dataset.fix || el.textContent;
+        el.classList.remove('struck'); el.classList.add('replaced');
+        if (el.hasAttribute('data-rainbow')) el.classList.add('rainbow-text');
+    }
     finalizeCorrection() {
         clearTimeout(this._struckT); clearTimeout(this._swapT);
-        const el = this.roleTreinador;
-        if (el) { el.textContent = 'Apoio à Equipa Técnica'; el.classList.remove('struck'); el.classList.add('replaced'); }
+        const el = this.curFix();
+        if (el) this.swapNow(el);
     }
     openPanel() { this.panel.classList.add('open'); document.body.classList.add('panel-open'); fitStage(); }
     softClosePanel() { this.panel.classList.remove('open'); document.body.classList.remove('panel-open'); fitStage(); } // fecha sem desfazer a correção
@@ -821,26 +829,21 @@ class Presentation {
         this.maybeCorrect();
     }
     applyCorrection() {
-        const el = this.roleTreinador;
+        const el = this.curFix();
         if (!el) return;
-        if (this.reducedMotion) {
-            el.textContent = 'Apoio à Equipa Técnica';
-            el.classList.remove('struck'); el.classList.add('replaced');
-            return;
-        }
+        if (this.reducedMotion) { this.swapNow(el); return; }
         clearTimeout(this._struckT); clearTimeout(this._swapT);
-        this._struckT = setTimeout(() => { el.classList.add('struck'); }, 650);   // 1) risca "Treinador" (após o texto)
-        this._swapT  = setTimeout(() => {                                         // 2) apaga e escreve no mesmo sítio
-            el.textContent = 'Apoio à Equipa Técnica';
-            el.classList.remove('struck'); el.classList.add('replaced');
-        }, 2200);                                                                 // bem mais lento e deliberado
+        this._struckT = setTimeout(() => el.classList.add('struck'), 650);        // 1) risca a palavra (após o texto)
+        this._swapT  = setTimeout(() => this.swapNow(el), 2200);                  // 2) substitui no mesmo sítio (lento)
     }
     resetCorrection() {
-        clearTimeout(this._struckT); clearTimeout(this._swapT); clearTimeout(this._closeT);
-        this._struckT = this._swapT = this._closeT = null;
+        clearTimeout(this._struckT); clearTimeout(this._swapT);
+        this._struckT = this._swapT = null;
         this.pendingCorrection = false;
-        const el = this.roleTreinador;
-        if (el) { el.textContent = 'Treinador'; el.classList.remove('struck', 'replaced'); }
+        this.fixEls.forEach((el) => {
+            if (el.dataset.orig != null) el.textContent = el.dataset.orig;
+            el.classList.remove('struck', 'replaced', 'rainbow-text');
+        });
     }
 
     bindKeys() {
@@ -878,9 +881,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('panel-open');
             const txt = DIALOGUES[idx];
             if (txt) document.getElementById('mairisaText').textContent = txt;
-            if (idx === 1) {
-                const rt = document.querySelector('.role-treinador');
-                if (rt) { rt.textContent = 'Apoio à Equipa Técnica'; rt.classList.add('replaced'); }
+            const fx = slides[idx] && slides[idx].querySelector('.mai-fix');
+            if (fx && fx.dataset.fix) {
+                fx.textContent = fx.dataset.fix; fx.classList.add('replaced');
+                if (fx.hasAttribute('data-rainbow')) fx.classList.add('rainbow-text');
             }
         }
         fitStage();

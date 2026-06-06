@@ -493,7 +493,7 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
     <!-- Cabeçalho (kicker + título, alinhado à esquerda como os outros slides) -->
     <div style="position:absolute; top:48px; left:60px; z-index:3; display:flex; flex-direction:column; gap:14px; max-width:560px;">
       <span class="kicker">A analogia do treino</span>
-      <h2 class="title" style="font-size:40px; line-height:1.12;"><span class="mai-fix" data-crossfade="1" data-fix="Desenvolve com IA com o mesmo critério com que dás treino.">Treinar o guarda-redes é <span class="rainbow-text">exatamente igual</span> a programar com IA.</span></h2>
+      <h2 class="title" style="font-size:40px; line-height:1.12;"><span class="mai-fix" data-crossfade="1" data-fix="Usa <span class='rainbow-text'>AI</span> com o mesmo critério com que dás <span class='rainbow-text'>treinos</span>.">Treinar o guarda-redes é <span class="rainbow-text">exatamente igual</span> a programar com IA.</span></h2>
     </div>
 
     <!-- Conectores (setas) -->
@@ -780,7 +780,7 @@ class Presentation {
     }
     curFix() { const s = this.slides[this.current]; return s ? s.querySelector('.mai-fix') : null; }
     swapNow(el) {
-        el.textContent = el.dataset.fix || el.textContent;
+        el.innerHTML = el.dataset.fix || el.innerHTML;   // data-fix pode conter <span rainbow-text>
         el.classList.remove('struck'); el.classList.add('replaced');
         if (el.hasAttribute('data-rainbow')) el.classList.add('rainbow-text');
     }
@@ -886,7 +886,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (txt) document.getElementById('mairisaText').textContent = txt;
             const fx = slides[idx] && slides[idx].querySelector('.mai-fix');
             if (fx && fx.dataset.fix) {
-                fx.textContent = fx.dataset.fix; fx.classList.add('replaced');
+                fx.innerHTML = fx.dataset.fix; fx.classList.add('replaced');
                 if (fx.hasAttribute('data-rainbow')) fx.classList.add('rainbow-text');
             }
         }

@@ -756,14 +756,10 @@ class Presentation {
             case 'typing':
                 this.finishTyping();                        // Enter a meio → completa o texto já
                 break;
-            case 'shown':
-                if (corr) {                                 // 2.º Enter (slide 2): mAIrisa sai, FICA no slide
-                    this.finalizeCorrection();              // garante a palavra trocada
-                    this.softClosePanel();
-                    this.mairisaState = 'sealed';
-                } else {
-                    this.next();                            // outros slides: fecha + avança
-                }
+            case 'shown':                                   // 2.º Enter: mAIrisa sai e FICA no slide (vês tudo)
+                this.finalizeCorrection();                  // garante a troca, se este slide tiver
+                this.softClosePanel();
+                this.mairisaState = 'sealed';
                 break;
             case 'sealed':
                 this.next();                                // 3.º Enter (slide 2): avança

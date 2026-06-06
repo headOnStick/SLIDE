@@ -27,8 +27,16 @@
    =========================================================== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body { height: 100%; overflow-x: hidden; background: #000; }
-html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+html, body { height: 100%; overflow: hidden; background: #000; }
+
+/* Layout estilo Copilot: deck (slides) encolhe quando o painel mAIrisa abre */
+.app { display: flex; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; }
+.deck {
+  flex: 1 1 auto; min-width: 0; height: 100%;
+  overflow-y: scroll; overflow-x: hidden;
+  scroll-snap-type: y mandatory; scroll-behavior: smooth; position: relative;
+}
+.deck::-webkit-scrollbar { width: 0; height: 0; }
 
 :root {
     /* Tokens em px, desenhados para o palco 1280×720 */
@@ -59,7 +67,7 @@ body { font-family: var(--font); color: var(--ink); -webkit-font-smoothing: anti
 
 /* Letterbox: o slide preenche o ecrã a preto e centra o palco escalado */
 .slide {
-    width: 100vw; height: 100vh; height: 100dvh;
+    width: 100%; height: 100%;
     scroll-snap-align: start;
     display: flex; align-items: center; justify-content: center;
     background: #000; overflow: hidden; position: relative;
@@ -241,6 +249,63 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
 @keyframes mediaGlow { 0% { box-shadow: 0 30px 70px -40px rgba(0,0,0,0.8); } 45% { box-shadow: 0 0 0 3px rgba(54,187,220,.55), 0 30px 70px -40px rgba(0,0,0,0.8); } 100% { box-shadow: 0 30px 70px -40px rgba(0,0,0,0.8); } }
 @keyframes shimmer { from { background-position: 120% 0; } to { background-position: 0 0; } }
 
+/* ===================== mAIrisa — painel estilo Copilot ===================== */
+#mairisa-panel {
+  flex: 0 0 0px; opacity: 0; height: 100%;
+  background: #0b131f; color: #EAF6FF;
+  overflow: hidden; position: relative; z-index: 60;
+  border-left: 0 solid var(--cyan); box-shadow: none;
+  transition: flex-basis .55s cubic-bezier(.16,1,.3,1), opacity .45s ease,
+              border-left-width .45s ease, box-shadow .55s ease;
+}
+#mairisa-panel.open {
+  flex: 0 0 380px; opacity: 1;
+  border-left: 3px solid var(--cyan);
+  box-shadow: -24px 0 70px -24px rgba(54,187,220,0.55);
+}
+.panel-inner {
+  width: 380px; height: 100%; box-sizing: border-box;
+  padding: 46px 34px; display: flex; flex-direction: column; gap: 26px;
+}
+.mairisa-head { display: flex; align-items: center; gap: 14px; flex: 0 0 auto; }
+.mairisa-orb {
+  width: 44px; height: 44px; border-radius: 50%; flex: 0 0 auto;
+  background: radial-gradient(circle at 35% 30%, #9fe8ff, var(--cyan) 55%, var(--blue));
+  animation: orbPulse 2.4s ease-in-out infinite;
+}
+@keyframes orbPulse {
+  0%,100% { box-shadow: 0 0 0 4px rgba(54,187,220,0.12), 0 0 18px 1px rgba(54,187,220,0.5); }
+  50%     { box-shadow: 0 0 0 6px rgba(54,187,220,0.20), 0 0 30px 5px rgba(54,187,220,0.85); }
+}
+.mairisa-name { font-size: 22px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.01em; }
+.mairisa-name b { color: var(--cyan); }
+.mairisa-sub { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #6b86a0; margin-top: 5px; }
+.mairisa-text {
+  flex: 1 1 auto; overflow-y: auto;
+  font-size: 32px; line-height: 1.32; font-weight: 600; color: #EAF6FF; letter-spacing: -0.01em;
+}
+.mairisa-text::-webkit-scrollbar { width: 0; }
+.mairisa-text.typing::after { content: '▋'; color: var(--cyan); margin-left: 2px; animation: caret 1s steps(1) infinite; }
+@keyframes caret { 0%,50% { opacity: 1; } 50.01%,100% { opacity: 0; } }
+.mairisa-foot { flex: 0 0 auto; font-size: 13px; color: #6b86a0; letter-spacing: 0.06em; }
+.mairisa-foot b { color: var(--cyan); }
+body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacity .3s; }
+
+/* Correção em tempo real no Slide 2 */
+.role-treinador { transition: color .4s ease; }
+.role-treinador.struck { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 5px; color: #9aa3ad; }
+.role-fix {
+  font-size: 26px; font-weight: 700; color: var(--red); letter-spacing: -0.01em; margin-top: 6px;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .5s ease .2s, transform .5s cubic-bezier(.16,1,.3,1) .2s;
+}
+.role-fix.show { opacity: 1; transform: none; }
+.role-fix .muted { color: #8a8f98; font-weight: 400; font-size: 0.82em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mairisa-orb, .mairisa-text.typing::after { animation: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .reveal > * { opacity: 1 !important; transform: none !important; transition: none; }
@@ -258,6 +323,9 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
   <symbol id="ic-frown" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="9" y1="10" x2="9.02" y2="10"/><line x1="15" y1="10" x2="15.02" y2="10"/><path d="M8.5 16c1-1.4 2.1-2 3.5-2s2.5 .6 3.5 2"/></symbol>
   <symbol id="ic-trophy" viewBox="0 0 24 24"><path d="M7 4.5h10V9a5 5 0 0 1-10 0V4.5z"/><path d="M7 6.5H4.6a2.4 2.4 0 0 0 2.7 3.2"/><path d="M17 6.5h2.4a2.4 2.4 0 0 1-2.7 3.2"/><line x1="12" y1="13.5" x2="12" y2="16"/><path d="M9.5 20h5"/><path d="M10.2 16.2h3.6l-.4 3.8h-2.8z"/></symbol>
 </defs></svg>
+
+<div class="app">
+<div class="deck" id="deck">
 
 <!-- ===== SLIDE 1 — ABERTURA (marca) ===== -->
 <section class="slide" data-title="Abertura">
@@ -278,7 +346,8 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
     <div class="content">
       <div class="reveal" style="display:flex; flex-direction:column; gap: 22px;">
         <span class="kicker">Quem sou eu</span>
-        <h2 class="title">Autodidata <span style="color:var(--orange)">•</span> Empresário<br />Pai <span style="color:var(--teal)">•</span> Treinador</h2>
+        <h2 class="title">Autodidata <span style="color:var(--orange)">•</span> Empresário<br />Pai <span style="color:var(--teal)">•</span> <span class="role-treinador">Treinador</span></h2>
+        <div class="role-fix">→ Treinador de GR <span class="muted">(A tirar o curso 🧤)</span></div>
         <div class="cols">
           <div class="card" style="--accent: var(--blue);">
             <span class="card-k">Treinador de guarda-redes</span>
@@ -560,24 +629,65 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
   </div>
 </section>
 
+</div><!-- /.deck -->
+
+<aside id="mairisa-panel" aria-live="polite">
+  <div class="panel-inner">
+    <div class="mairisa-head">
+      <span class="mairisa-orb"></span>
+      <div>
+        <div class="mairisa-name">m<b>AI</b>risa</div>
+        <div class="mairisa-sub">IA adjunta</div>
+      </div>
+    </div>
+    <div class="mairisa-text" id="mairisaText"></div>
+    <div class="mairisa-foot"><b>Enter</b> para continuar →</div>
+  </div>
+</aside>
+</div><!-- /.app -->
+
 <nav class="nav-dots" id="navDots" aria-label="Navegação de slides"></nav>
-<div class="kbd-hint"><b>↑ ↓</b> ou <b>espaço</b> · <b>F</b> ecrã inteiro</div>
+<div class="kbd-hint"><b>↑ ↓</b> navegar · <b>Enter</b> mAIrisa · <b>F</b> ecrã inteiro</div>
 
 <script>
-/* ===== Escala 16:9: ajusta o palco ao ecrã (letterbox) ===== */
+/* ===== Escala 16:9: ajusta o palco à área do deck (que encolhe com o painel) ===== */
+const deckEl = document.getElementById('deck');
 function fitStage() {
-    const s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
-    document.documentElement.style.setProperty('--scale', s);
+    const w = deckEl ? deckEl.clientWidth : window.innerWidth;
+    const h = deckEl ? deckEl.clientHeight : window.innerHeight;
+    document.documentElement.style.setProperty('--scale', Math.min(w / 1280, h / 720));
 }
 window.addEventListener('resize', fitStage);
+if (deckEl && 'ResizeObserver' in window) new ResizeObserver(fitStage).observe(deckEl);
 fitStage();
 
-/* ===== Controlador da apresentação ===== */
+/* Diálogos da mAIrisa, mapeados por índice 0-based (slides 2, 6, 10, 12, 13) */
+const DIALOGUES = {
+    1:  "Alerta do IPDJ: 'Treinador' é esticar um bocado a corda, André… Tu dás apoio à equipa e uma grande ajuda aos Guarda-Redes. Vai mas é tirar o curso oficial! Vou tomar a liberdade de corrigir isso aqui no slide.",
+    5:  "E confirmo que o código do tracking ficou limpo e a correr a 60 frames por segundo. De nada, André. (Ah, e aquela linha de código que querias inventar às 3 da manhã? Apaguei-a para não passares vergonha em palco.)",
+    9:  "Sim ou sopas! Se o prompt for fraco, eu alucino mesmo. Se vocês me derem ordens genéricas, eu devolvo respostas genéricas. Eu preciso de bases, regras e contexto. O cérebro do treinador tem de comandar!",
+    11: "Exato, André. Menos tempo perdido no terminal a bater código significa mais tempo para estares no pavilhão com os teus atletas. E mais tempo para seres o pai que o Gonçalo precisa. Missão cumprida.",
+    12: "Ficou top, 'Treinador'. Arrisquem como o André fez comigo. Fui!"
+};
+
+/* ===== Controlador da apresentação + mAIrisa (IA adjunta) ===== */
 class Presentation {
     constructor() {
         this.slides = Array.from(document.querySelectorAll('.slide'));
         this.current = 0;
         this.progress = document.getElementById('progress');
+
+        /* mAIrisa */
+        this.panel = document.getElementById('mairisa-panel');
+        this.mairisaTextEl = document.getElementById('mairisaText');
+        this.roleTreinador = document.querySelector('.role-treinador');
+        this.roleFix = document.querySelector('.role-fix');
+        this.mairisaState = 'closed';   // closed | typing | shown
+        this.typeTimer = null;
+        this.fullText = '';
+        this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.dialogues = DIALOGUES;
+
         this.buildDots();
         this.observe();
         this.bindKeys();
@@ -609,10 +719,11 @@ class Presentation {
             entries.forEach((e) => {
                 const vids = e.target.querySelectorAll('video');
                 if (e.isIntersecting) {
+                    const idx = this.slides.indexOf(e.target);
+                    if (idx !== this.current) this.closeMairisa(); // fecha o painel ao mudar de slide
+                    this.current = idx;
                     this.stageOf(e.target).classList.add('in');
-                    this.current = this.slides.indexOf(e.target);
                     this.syncDots(); this.updateProgress();
-                    // arranca os vídeos do início ao entrar no slide
                     vids.forEach((v) => {
                         try { v.currentTime = 0; } catch (_) {}
                         const pr = v.play();
@@ -622,7 +733,7 @@ class Presentation {
                     vids.forEach((v) => v.pause());
                 }
             });
-        }, { threshold: 0.55 });
+        }, { root: deckEl, threshold: 0.55 });
         this.slides.forEach((s) => io.observe(s));
     }
     syncDots() { this.dots.forEach((d, i) => d.classList.toggle('active', i === this.current)); }
@@ -630,12 +741,72 @@ class Presentation {
         const pct = this.slides.length > 1 ? (this.current / (this.slides.length - 1)) * 100 : 100;
         this.progress.style.width = pct + '%';
     }
-    goTo(i) { i = Math.max(0, Math.min(this.slides.length - 1, i)); this.slides[i].scrollIntoView({ behavior: 'smooth' }); }
+    goTo(i) {
+        this.closeMairisa();
+        i = Math.max(0, Math.min(this.slides.length - 1, i));
+        this.slides[i].scrollIntoView({ behavior: 'smooth' });
+    }
     next() { this.goTo(this.current + 1); }
     prev() { this.goTo(this.current - 1); }
+
+    /* -------- mAIrisa -------- */
+    handleEnter() {
+        const dlg = this.dialogues[this.current];
+        if (!dlg) { this.next(); return; }                 // slide sem diálogo → avança
+        if (this.mairisaState === 'shown') { this.next(); return; }   // 2.º Enter → fecha (goTo) + avança
+        if (this.mairisaState === 'typing') { this.finishTyping(); return; } // Enter a meio → completa já
+        // 1.º Enter → abre + escreve
+        this.openPanel();
+        if (this.current === 1) this.applyCorrection();    // slide 2: correção "Treinador"
+        if (this.reducedMotion) { this.mairisaTextEl.textContent = dlg; this.fullText = dlg; this.mairisaState = 'shown'; }
+        else this.typeText(dlg);
+    }
+    openPanel() { this.panel.classList.add('open'); document.body.classList.add('panel-open'); fitStage(); }
+    closeMairisa() {
+        if (this.typeTimer) { clearInterval(this.typeTimer); this.typeTimer = null; }
+        this.panel.classList.remove('open');
+        document.body.classList.remove('panel-open');
+        this.mairisaState = 'closed';
+        this.resetCorrection();
+        fitStage();
+    }
+    typeText(text) {
+        this.mairisaState = 'typing';
+        this.fullText = text;
+        const el = this.mairisaTextEl;
+        el.textContent = ''; el.classList.add('typing');
+        let i = 0;
+        if (this.typeTimer) clearInterval(this.typeTimer);
+        this.typeTimer = setInterval(() => {
+            el.textContent = text.slice(0, ++i);
+            el.scrollTop = el.scrollHeight;
+            if (i >= text.length) {
+                clearInterval(this.typeTimer); this.typeTimer = null;
+                el.classList.remove('typing');
+                this.mairisaState = 'shown';
+            }
+        }, 20);
+    }
+    finishTyping() {
+        if (this.typeTimer) { clearInterval(this.typeTimer); this.typeTimer = null; }
+        this.mairisaTextEl.textContent = this.fullText;
+        this.mairisaTextEl.classList.remove('typing');
+        this.mairisaState = 'shown';
+    }
+    applyCorrection() {
+        if (this.roleTreinador) this.roleTreinador.classList.add('struck');
+        if (this.roleFix) this.roleFix.classList.add('show');
+    }
+    resetCorrection() {
+        if (this.roleTreinador) this.roleTreinador.classList.remove('struck');
+        if (this.roleFix) this.roleFix.classList.remove('show');
+    }
+
     bindKeys() {
         window.addEventListener('keydown', (e) => {
             switch (e.key) {
+                case 'Enter': e.preventDefault(); this.handleEnter(); break;
+                case 'Escape': e.preventDefault(); this.closeMairisa(); break;
                 case 'ArrowDown': case 'ArrowRight': case ' ': case 'PageDown': e.preventDefault(); this.next(); break;
                 case 'ArrowUp': case 'ArrowLeft': case 'PageUp': e.preventDefault(); this.prev(); break;
                 case 'Home': e.preventDefault(); this.goTo(0); break;
@@ -655,11 +826,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (only) {
         const idx = parseInt(only, 10) - 1;
         const slides = Array.from(document.querySelectorAll('.slide'));
-        document.documentElement.style.scrollSnapType = 'none';
+        if (deckEl) deckEl.style.scrollSnapType = 'none';
         slides.forEach((s, i) => {
             if (i === idx) s.querySelector('.stage').classList.add('in');
             else s.style.display = 'none';
         });
+        // Pré-visualização da mAIrisa em modo captura (?mairisa=1)
+        if (new URLSearchParams(location.search).get('mairisa')) {
+            document.getElementById('mairisa-panel').classList.add('open');
+            document.body.classList.add('panel-open');
+            const txt = DIALOGUES[idx];
+            if (txt) document.getElementById('mairisaText').textContent = txt;
+            if (idx === 1) {
+                const rt = document.querySelector('.role-treinador'); if (rt) rt.classList.add('struck');
+                const rf = document.querySelector('.role-fix'); if (rf) rf.classList.add('show');
+            }
+        }
         fitStage();
         return;
     }

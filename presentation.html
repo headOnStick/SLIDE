@@ -205,6 +205,39 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
 .in .reveal > *:nth-child(5) { transition-delay: .32s; }
 .in .reveal > *:nth-child(6) { transition-delay: .40s; }
 
+/* ============== Animações específicas (só com movimento permitido) ============== */
+@media (prefers-reduced-motion: no-preference) {
+  /* Slide 10 — desenhar o fluxo: caixas entram em sequência, setas "desenham-se" */
+  .flow { opacity: 0; transform: translateY(12px) scale(0.985); transition: opacity .55s cubic-bezier(.16,1,.3,1), transform .55s cubic-bezier(.16,1,.3,1); }
+  .stage.in .flow { opacity: 1; transform: none; }
+  .flow-path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .55s ease; }
+  .stage.in .flow-path { stroke-dashoffset: 0; }
+
+  /* Slide 7 — acrónimo em cascata */
+  .acro-line { opacity: 0; }
+  .stage.in .acro-line { animation: acroIn .5s cubic-bezier(.16,1,.3,1) both; }
+  .stage.in .acro-line:nth-child(1) { animation-delay: .30s; }
+  .stage.in .acro-line:nth-child(2) { animation-delay: .42s; }
+  .stage.in .acro-line:nth-child(3) { animation-delay: .54s; }
+  .stage.in .acro-line:nth-child(4) { animation-delay: .66s; }
+  .stage.in .acro-line:nth-child(5) { animation-delay: .78s; }
+
+  /* Slide 9 — "É." e "Nem por isso." aterram com micro-emphasis */
+  .two-tone .yes, .two-tone .no { display: inline-block; opacity: 0; }
+  .stage.in .two-tone .yes { animation: pop .5s .45s both; }
+  .stage.in .two-tone .no  { animation: pop .5s .85s both; }
+
+  /* Slide 8 — brilho subtil no vídeo ao entrar */
+  .stage.in .media-glow { animation: mediaGlow 1.5s ease .35s 1 both; }
+
+  /* Capa — shimmer único do "Artificial" */
+  .shimmer { background-size: 220% 100%; animation: shimmer 1.5s ease .4s 1 both; }
+}
+@keyframes acroIn { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+@keyframes pop { 0% { transform: scale(.55); opacity: 0; } 60% { transform: scale(1.14); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes mediaGlow { 0% { box-shadow: 0 30px 70px -40px rgba(0,0,0,0.8); } 45% { box-shadow: 0 0 0 3px rgba(54,187,220,.55), 0 30px 70px -40px rgba(0,0,0,0.8); } 100% { box-shadow: 0 30px 70px -40px rgba(0,0,0,0.8); } }
+@keyframes shimmer { from { background-position: 120% 0; } to { background-position: 0 0; } }
+
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .reveal > * { opacity: 1 !important; transform: none !important; transition: none; }
@@ -221,7 +254,7 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
     <div class="content" style="align-items: flex-end; text-align: right; padding-right: 84px;">
       <div class="reveal" style="max-width: 760px; display:flex; flex-direction:column; gap: 16px; align-items: flex-end;">
         <span class="kicker" style="color:#222;">André Rocha</span>
-        <h1 class="hero" style="color:#0b0b0b; font-size: 56px; line-height: 1.05;">A Inteligência <span class="rainbow-text">Artificial</span> ao Serviço do Treinador</h1>
+        <h1 class="hero" style="color:#0b0b0b; font-size: 56px; line-height: 1.05;">A Inteligência <span class="rainbow-text shimmer">Artificial</span> ao Serviço do Treinador</h1>
         <p class="lead" style="color:#1a1a1a; font-weight:700;">Aplicações Práticas e Ferramentas de Apoio</p>
       </div>
     </div>
@@ -315,7 +348,7 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
         </div>
         <div style="flex: 1 1 0;">
           <div class="media">
-            <img src="assets/claude-code.png" alt="Terminal com o Claude Code a construir o Protocolo G.R.O.C.H.A." />
+            <img src="assets/claude-code-crop.png" alt="Terminal com o Claude Code a construir o Protocolo G.R.O.C.H.A." />
             <span class="media-caption">A dar as instruções ao Claude Code para dar vida à ideia</span>
           </div>
         </div>
@@ -355,7 +388,7 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
           <span class="kicker">O resultado · o momento WOW</span>
           <h2 class="title" style="font-size: 52px;">Protocolo <span class="rainbow-text">G.R.O.C.H.A.</span></h2>
         </div>
-        <div class="media" style="aspect-ratio: 1710 / 568; max-height: 520px; width: 100%;">
+        <div class="media media-glow" style="aspect-ratio: 1710 / 568; max-height: 520px; width: 100%;">
           <video src="assets/grocha-h264.mp4" poster="assets/grocha-poster.jpg" muted loop playsinline style="object-fit: contain; background:#06101c;"></video>
         </div>
       </div>
@@ -397,33 +430,33 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
         <marker id="ah-green" markerWidth="13" markerHeight="13" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4 L0,8 Z" fill="#3E9E4F"/></marker>
       </defs>
       <!-- Treinador → Abordagem -->
-      <path d="M270,372 L336,372" fill="none" stroke="#9aa3ad" stroke-width="3" marker-end="url(#ah-grey)"/>
+      <path class="flow-path" pathLength="1" style="transition-delay:.25s" d="M270,372 L336,372" fill="none" stroke="#9aa3ad" stroke-width="3" marker-end="url(#ah-grey)"/>
       <!-- Abordagem → (cima) Mandar fazer -->
-      <path d="M540,360 L590,360 L590,212 L632,212" fill="none" stroke="#E0241C" stroke-width="3" stroke-linejoin="round" marker-end="url(#ah-red)"/>
+      <path class="flow-path" pathLength="1" style="transition-delay:.8s" d="M540,360 L590,360 L590,212 L632,212" fill="none" stroke="#E0241C" stroke-width="3" stroke-linejoin="round" marker-end="url(#ah-red)"/>
       <!-- Abordagem → (baixo) Orquestrar -->
-      <path d="M540,386 L590,386 L590,520 L632,520" fill="none" stroke="#3E9E4F" stroke-width="3" stroke-linejoin="round" marker-end="url(#ah-green)"/>
+      <path class="flow-path" pathLength="1" style="transition-delay:.8s" d="M540,386 L590,386 L590,520 L632,520" fill="none" stroke="#3E9E4F" stroke-width="3" stroke-linejoin="round" marker-end="url(#ah-green)"/>
       <!-- Mandar fazer → Frustração -->
-      <path d="M912,212 L944,212" fill="none" stroke="#E0241C" stroke-width="3" marker-end="url(#ah-red)"/>
+      <path class="flow-path" pathLength="1" style="transition-delay:1.35s" d="M912,212 L944,212" fill="none" stroke="#E0241C" stroke-width="3" marker-end="url(#ah-red)"/>
       <!-- Orquestrar → Resolução -->
-      <path d="M912,520 L944,520" fill="none" stroke="#3E9E4F" stroke-width="3" marker-end="url(#ah-green)"/>
+      <path class="flow-path" pathLength="1" style="transition-delay:1.35s" d="M912,520 L944,520" fill="none" stroke="#3E9E4F" stroke-width="3" marker-end="url(#ah-green)"/>
     </svg>
 
     <!-- Caixa: O TREINADOR -->
-    <div style="position:absolute; left:60px; top:317px; width:210px; height:110px; z-index:2; box-sizing:border-box; border-radius:16px; background:#fff; border:2.5px solid var(--blue); box-shadow:0 16px 34px -20px rgba(0,0,0,0.4); padding:16px 18px; display:flex; flex-direction:column; justify-content:center; gap:3px;">
+    <div class="flow" style="transition-delay:0s; position:absolute; left:60px; top:317px; width:210px; height:110px; z-index:2; box-sizing:border-box; border-radius:16px; background:#fff; border:2.5px solid var(--blue); box-shadow:0 16px 34px -20px rgba(0,0,0,0.4); padding:16px 18px; display:flex; flex-direction:column; justify-content:center; gap:3px;">
       <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--blue);">O ponto de partida</span>
       <span style="font-size:25px; font-weight:700; line-height:1;">O Treinador</span>
       <span style="font-size:14px; color:#777;">a ideia · o problema</span>
     </div>
 
     <!-- Caixa: A ABORDAGEM (decisão) -->
-    <div style="position:absolute; left:345px; top:332px; width:195px; height:80px; z-index:2; box-sizing:border-box; border-radius:16px; background:var(--navy); color:#fff; box-shadow:0 16px 34px -18px rgba(0,0,0,0.5); padding:14px 18px; display:flex; flex-direction:column; justify-content:center; gap:2px; overflow:hidden;">
+    <div class="flow" style="transition-delay:.45s; position:absolute; left:345px; top:332px; width:195px; height:80px; z-index:2; box-sizing:border-box; border-radius:16px; background:var(--navy); color:#fff; box-shadow:0 16px 34px -18px rgba(0,0,0,0.5); padding:14px 18px; display:flex; flex-direction:column; justify-content:center; gap:2px; overflow:hidden;">
       <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:#8FC9E6;">A decisão</span>
       <span style="font-size:25px; font-weight:700; line-height:1;">A Abordagem</span>
       <span style="position:absolute; bottom:0; left:0; width:100%; height:5px; background:var(--rainbow);"></span>
     </div>
 
     <!-- Caixa: MANDAR FAZER (atalho errado) -->
-    <div style="position:absolute; left:636px; top:150px; width:286px; height:124px; z-index:2; box-sizing:border-box; border-radius:16px; background:#fff; border:2.5px solid var(--orange); box-shadow:0 16px 34px -22px rgba(0,0,0,0.4); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:5px;">
+    <div class="flow" style="transition-delay:1.05s; position:absolute; left:636px; top:150px; width:286px; height:124px; z-index:2; box-sizing:border-box; border-radius:16px; background:#fff; border:2.5px solid var(--orange); box-shadow:0 16px 34px -22px rgba(0,0,0,0.4); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:5px;">
       <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--orange);">✕ O atalho errado</span>
       <span style="font-size:21px; font-weight:700; line-height:1;">Mandar fazer</span>
       <div style="display:flex; flex-direction:column; gap:3px; font-size:13.5px; font-style:italic; color:#666; line-height:1.25;">
@@ -433,7 +466,7 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
     </div>
 
     <!-- Caixa: FRUSTRAÇÃO -->
-    <div style="position:absolute; left:948px; top:150px; width:272px; height:124px; z-index:2; box-sizing:border-box; border-radius:16px; background:#FCEBE9; border:2.5px solid var(--red); box-shadow:0 16px 34px -22px rgba(224,36,28,0.35); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:4px;">
+    <div class="flow" style="transition-delay:1.5s; position:absolute; left:948px; top:150px; width:272px; height:124px; z-index:2; box-sizing:border-box; border-radius:16px; background:#FCEBE9; border:2.5px solid var(--red); box-shadow:0 16px 34px -22px rgba(224,36,28,0.35); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:4px;">
       <span style="font-size:24px; font-weight:700; color:var(--red); line-height:1; display:flex; align-items:center; gap:8px;"><span style="font-size:23px;">🙇</span>Frustração</span>
       <div style="display:flex; flex-direction:column; gap:3px; font-size:14px; color:#9b3a34; line-height:1.25;">
         <span>🏟️ O miúdo não evolui.</span>
@@ -442,7 +475,7 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
     </div>
 
     <!-- Caixa: ORQUESTRAR / TREINAR (processo) -->
-    <div style="position:absolute; left:636px; top:446px; width:286px; height:148px; z-index:2; box-sizing:border-box; border-radius:16px; background:#fff; border:2.5px solid var(--teal); box-shadow:0 16px 34px -22px rgba(0,0,0,0.4); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:6px;">
+    <div class="flow" style="transition-delay:1.05s; position:absolute; left:636px; top:446px; width:286px; height:148px; z-index:2; box-sizing:border-box; border-radius:16px; background:#fff; border:2.5px solid var(--teal); box-shadow:0 16px 34px -22px rgba(0,0,0,0.4); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:6px;">
       <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--teal);">✓ O processo certo</span>
       <span style="font-size:21px; font-weight:700; line-height:1;">Orquestrar / Treinar</span>
       <div style="display:flex; flex-direction:column; gap:3px; font-size:13.5px; color:#444; line-height:1.25;">
@@ -452,7 +485,7 @@ p.body { font-size: var(--body-size); line-height: 1.5; color: #2a2a2a; }
     </div>
 
     <!-- Caixa: RESOLUÇÃO -->
-    <div style="position:absolute; left:948px; top:458px; width:272px; height:124px; z-index:2; box-sizing:border-box; border-radius:16px; background:#EAF6EC; border:2.5px solid var(--green); box-shadow:0 16px 34px -22px rgba(62,158,79,0.3); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:4px;">
+    <div class="flow" style="transition-delay:1.5s; position:absolute; left:948px; top:458px; width:272px; height:124px; z-index:2; box-sizing:border-box; border-radius:16px; background:#EAF6EC; border:2.5px solid var(--green); box-shadow:0 16px 34px -22px rgba(62,158,79,0.3); padding:15px 18px; display:flex; flex-direction:column; justify-content:center; gap:4px;">
       <span style="font-size:24px; font-weight:700; color:#2F8C40; line-height:1; display:flex; align-items:center; gap:8px;"><span style="font-size:23px;">🏆</span>Resolução</span>
       <div style="display:flex; flex-direction:column; gap:3px; font-size:14px; color:#2c6e3a; line-height:1.25;">
         <span>🏟️ A grande defesa</span>

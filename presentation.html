@@ -747,21 +747,42 @@ class Presentation {
     /* -------- mAIrisa -------- */
     handleEnter() {
         const dlg = this.dialogues[this.current];
-        if (!dlg) { this.next(); return; }                 // slide sem diálogo → avança
-        if (this.mairisaState === 'shown') { this.next(); return; }   // 2.º Enter → fecha (goTo) + avança
-        if (this.mairisaState === 'typing') { this.finishTyping(); return; } // Enter a meio → completa já
-        // 1.º Enter → abre + escreve (a correção só acontece DEPOIS do texto completo)
-        this.openPanel();
-        this.pendingCorrection = (this.current === 1);
-        if (this.reducedMotion) {
-            this.mairisaTextEl.textContent = dlg; this.fullText = dlg; this.mairisaState = 'shown';
-            this.maybeCorrect();
-        } else {
-            this.typeText(dlg);
+        if (!dlg) { this.next(); return; }                  // slide sem diálogo → avança
+        const corr = (this.current === 1);                  // slide com substituição de palavra
+        switch (this.mairisaState) {
+            case 'typing':
+                this.finishTyping();                        // Enter a meio → completa o texto já
+                break;
+            case 'shown':
+                if (corr) {                                 // 2.º Enter (slide 2): mAIrisa sai, FICA no slide
+                    this.finalizeCorrection();              // garante a palavra trocada
+                    this.softClosePanel();
+                    this.mairisaState = 'sealed';
+                } else {
+                    this.next();                            // outros slides: fecha + avança
+                }
+                break;
+            case 'sealed':
+                this.next();                                // 3.º Enter (slide 2): avança
+                break;
+            default: // 'closed' → 1.º Enter: abre + escreve (correção só após o texto)
+                this.openPanel();
+                this.pendingCorrection = corr;
+                if (this.reducedMotion) {
+                    this.mairisaTextEl.textContent = dlg; this.fullText = dlg; this.mairisaState = 'shown';
+                    this.maybeCorrect();
+                } else {
+                    this.typeText(dlg);
+                }
         }
     }
     maybeCorrect() {
         if (this.pendingCorrection) { this.pendingCorrection = false; this.applyCorrection(); }
+    }
+    finalizeCorrection() {
+        clearTimeout(this._struckT); clearTimeout(this._swapT);
+        const el = this.roleTreinador;
+        if (el) { el.textContent = 'Apoio à Equipa Técnica'; el.classList.remove('struck'); el.classList.add('replaced'); }
     }
     openPanel() { this.panel.classList.add('open'); document.body.classList.add('panel-open'); fitStage(); }
     softClosePanel() { this.panel.classList.remove('open'); document.body.classList.remove('panel-open'); fitStage(); } // fecha sem desfazer a correção
@@ -811,7 +832,6 @@ class Presentation {
         this._swapT  = setTimeout(() => {                                         // 2) apaga e escreve no mesmo sítio
             el.textContent = 'Apoio à Equipa Técnica';
             el.classList.remove('struck'); el.classList.add('replaced');
-            this._closeT = setTimeout(() => this.softClosePanel(), 950);          // 3) fecha a mAIrisa mas fica no slide
         }, 2200);                                                                 // bem mais lento e deliberado
     }
     resetCorrection() {

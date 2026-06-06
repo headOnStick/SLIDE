@@ -617,7 +617,7 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
       <div class="reveal" style="display:flex; flex-direction:column; gap: 16px; align-items:center; width:100%;">
         <h1 class="hero" style="color:#0b0b0b; font-size:64px; line-height:1.08; max-width:1020px;">Arrisca e entra em campo com m<span class="rainbow-text">AI</span>s um.</h1>
         <p style="color:#2a2a2a; font-size:36px; font-weight:400; letter-spacing:0.02em; margin-top:4px;">Obrigado.</p>
-        <p class="body" style="color:#444;"><b>André Rocha</b></p>
+        <p class="body" style="color:#444;"><span class="mai-fix" data-crossfade="1" data-fix="<b>André Rocha</b> e m<span class='rainbow-text'>AI</span>risa"><b>André Rocha</b></span></p>
       </div>
     </div>
   </div>
@@ -663,7 +663,7 @@ const DIALOGUES = {
     5:  "E confirmo que o código do tracking ficou limpo e a correr a 60 frames por segundo. De nada, André. (Ah, e aquela linha de código que querias inventar às 3 da manhã? Apaguei-a para não passares vergonha em palco.)",
     9:  "Ei… 'igual a programar com IA'? Isso é um título à ChatGPT — óbvio demais. E está errado. Deixa-me afinar:",
     11: "Exato, André. E não é preciso seres programador — é usares a IA no dia-a-dia para automatizar tarefas e criar as ferramentas que te ajudam. O tempo que ganhas é para o pavilhão, para os teus atletas… e para seres o pai que o Gonçalo precisa. Missão cumprida.",
-    12: "Ficou top, 'Treinador'. Arrisquem como o André fez comigo. Fui!"
+    12: "Ficou top, 'Treinador'. Arrisquem como o André fez comigo. Última correção… 😏 Fui!"
 };
 
 /* ===== Controlador da apresentação + mAIrisa (IA adjunta) ===== */
@@ -761,8 +761,8 @@ class Presentation {
                 this.softClosePanel();
                 this.mairisaState = 'sealed';
                 break;
-            case 'sealed':
-                this.next();                                // 3.º Enter (slide 2): avança
+            case 'sealed':                                  // 3.º Enter: avança (último slide fica, mantém assinatura)
+                if (this.current < this.slides.length - 1) this.next();
                 break;
             default: // 'closed' → 1.º Enter: abre + escreve (correção só após o texto)
                 this.openPanel();

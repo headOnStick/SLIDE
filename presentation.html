@@ -493,7 +493,7 @@ body.panel-open .nav-dots { opacity: 0; pointer-events: none; transition: opacit
     <!-- Cabeçalho (kicker + título, alinhado à esquerda como os outros slides) -->
     <div style="position:absolute; top:48px; left:60px; z-index:3; display:flex; flex-direction:column; gap:14px; max-width:560px;">
       <span class="kicker">A analogia do treino</span>
-      <h2 class="title" style="font-size:40px; line-height:1.12;">Treinar o guarda-redes é <span class="rainbow-text">exatamente igual</span> a programar com IA.</h2>
+      <h2 class="title" style="font-size:40px; line-height:1.12;"><span class="mai-fix" data-crossfade="1" data-fix="Desenvolve com IA com o mesmo critério com que dás treino.">Treinar o guarda-redes é <span class="rainbow-text">exatamente igual</span> a programar com IA.</span></h2>
     </div>
 
     <!-- Conectores (setas) -->
@@ -661,7 +661,7 @@ const DIALOGUES = {
     1:  "'Treinador' é esticar um bocado a corda, André… Dás apoio à equipa e uma grande ajuda aos guarda-redes, mas tens de tirar o curso. Vou corrigir o slide.",
     4:  "'Pai', não… 'Mister'! É a típica pergunta do Gu. E como em treino ele te trata por Mister, vou já corrigir.",
     5:  "E confirmo que o código do tracking ficou limpo e a correr a 60 frames por segundo. De nada, André. (Ah, e aquela linha de código que querias inventar às 3 da manhã? Apaguei-a para não passares vergonha em palco.)",
-    9:  "Sim ou sopas! Se o prompt for fraco, eu alucino mesmo. Se vocês me derem ordens genéricas, eu devolvo respostas genéricas. Eu preciso de bases, regras e contexto. O cérebro do treinador tem de comandar!",
+    9:  "Ei… 'igual a programar com IA'? Isso é um título à ChatGPT — óbvio demais. E está errado. Deixa-me afinar:",
     11: "Exato, André. Menos tempo perdido no terminal a bater código significa mais tempo para estares no pavilhão com os teus atletas. E mais tempo para seres o pai que o Gonçalo precisa. Missão cumprida.",
     12: "Ficou top, 'Treinador'. Arrisquem como o André fez comigo. Fui!"
 };
@@ -677,7 +677,7 @@ class Presentation {
         this.panel = document.getElementById('mairisa-panel');
         this.mairisaTextEl = document.getElementById('mairisaText');
         this.fixEls = Array.from(document.querySelectorAll('.mai-fix'));
-        this.fixEls.forEach((el) => { el.dataset.orig = el.textContent; });
+        this.fixEls.forEach((el) => { el._origHTML = el.innerHTML; });
         this._swapT = null; this._struckT = null;
         this.pendingCorrection = false;
         this.mairisaState = 'closed';   // closed | typing | shown
@@ -829,16 +829,23 @@ class Presentation {
         if (!el) return;
         if (this.reducedMotion) { this.swapNow(el); return; }
         clearTimeout(this._struckT); clearTimeout(this._swapT);
-        this._struckT = setTimeout(() => el.classList.add('struck'), 650);        // 1) risca a palavra (após o texto)
-        this._swapT  = setTimeout(() => this.swapNow(el), 2200);                  // 2) substitui no mesmo sítio (lento)
+        if (el.hasAttribute('data-crossfade')) {                                  // frase inteira → crossfade (sem risco)
+            el.style.transition = 'opacity .4s ease';
+            this._struckT = setTimeout(() => { el.style.opacity = '0'; }, 500);
+            this._swapT  = setTimeout(() => { el.style.opacity = ''; this.swapNow(el); }, 1100);
+        } else {                                                                  // palavra → risca + troca
+            this._struckT = setTimeout(() => el.classList.add('struck'), 650);
+            this._swapT  = setTimeout(() => this.swapNow(el), 2200);
+        }
     }
     resetCorrection() {
         clearTimeout(this._struckT); clearTimeout(this._swapT);
         this._struckT = this._swapT = null;
         this.pendingCorrection = false;
         this.fixEls.forEach((el) => {
-            if (el.dataset.orig != null) el.textContent = el.dataset.orig;
+            if (el._origHTML != null) el.innerHTML = el._origHTML;
             el.classList.remove('struck', 'replaced', 'rainbow-text');
+            el.style.opacity = ''; el.style.transition = '';
         });
     }
 
